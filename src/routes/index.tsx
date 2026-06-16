@@ -1,29 +1,50 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { Toaster } from "@/components/ui/sonner";
+import { Navbar } from "@/components/site/Navbar";
+import { Hero } from "@/components/site/Hero";
+import { About } from "@/components/site/About";
+import { Services } from "@/components/site/Services";
+import { Loyalty } from "@/components/site/Loyalty";
+import { Gallery } from "@/components/site/Gallery";
+import { WhyParents, Testimonials } from "@/components/site/Reviews";
+import { Booking } from "@/components/site/Booking";
+import { Footer } from "@/components/site/Footer";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Your App" },
-      { name: "description", content: "Replace this with a one-sentence description of your app." },
-      { property: "og:title", content: "Your App" },
-      { property: "og:description", content: "Replace this with a one-sentence description of your app." },
+      { title: "Kids' Nook | Children's Salon & Activity Center in Nairobi" },
+      {
+        name: "description",
+        content:
+          "More than a salon — haircare, gaming, library, outdoor play & creative fun for kids in Nairobi. Play. Create. Get Pampered.",
+      },
+      { property: "og:title", content: "Kids' Nook | A Happy Place for Kids" },
+      {
+        property: "og:description",
+        content: "Haircare, play, creativity, and memorable experiences—all under one roof.",
+      },
     ],
   }),
   component: Index,
 });
 
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
 function Index() {
   return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
+    <div className="min-h-screen bg-background">
+      <Navbar />
+      <main>
+        <Hero />
+        <About />
+        <Services />
+        <Loyalty />
+        <Gallery />
+        <WhyParents />
+        <Testimonials />
+        <Booking />
+      </main>
+      <Footer />
+      <Toaster richColors position="top-center" />
     </div>
   );
 }
