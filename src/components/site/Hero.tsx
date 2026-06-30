@@ -1,6 +1,6 @@
 import { Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import girl from "@/assets/girl-glasses.png.asset.json";
+import girl from "@/assets/girl-glasses.png";
 
 const trust = [
   "Child-Friendly Environment",
