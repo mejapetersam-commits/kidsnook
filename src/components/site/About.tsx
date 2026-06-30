@@ -1,4 +1,4 @@
-import mother from "@/assets/mother-child.png.asset.json";
+import mother from "@/assets/mother-child.png";
 
 export function About() {
   return (
