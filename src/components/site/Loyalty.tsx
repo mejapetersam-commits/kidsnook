@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import loyalty from "@/assets/loyalty-poster.png.asset.json";
+import loyalty from "@/assets/loyalty-poster.png";
 
 export function Loyalty() {
   return (
