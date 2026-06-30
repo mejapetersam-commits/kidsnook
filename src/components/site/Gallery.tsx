@@ -1,7 +1,7 @@
 import { Instagram } from "lucide-react";
 import { INSTAGRAM_URL } from "@/lib/site-data";
-import girl from "@/assets/girl-glasses.png.asset.json";
-import mother from "@/assets/mother-child.png.asset.json";
+import girl from "@/assets/girl-glasses.png";
+import mother from "@/assets/mother-child.png";
 import birthday from "@/assets/birthday.png";
 import gaming from "@/assets/gaming.jpg";
 import library from "@/assets/library.jpg";
