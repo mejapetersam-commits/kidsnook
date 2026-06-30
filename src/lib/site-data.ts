@@ -10,7 +10,7 @@ import {
   HeartHandshake,
 } from "lucide-react";
 
-export const WHATSAPP_NUMBER = "254700000000";
+export const WHATSAPP_NUMBER = "254716727810";
 export const INSTAGRAM_URL =
   "https://www.instagram.com/kidsnooksalon?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==";
 
