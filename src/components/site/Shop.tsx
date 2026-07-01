@@ -19,4 +19,4 @@ export function Shop() {
       <div className="mx-auto max-w-7xl px-5 py-16 lg:py-24">
         <div className="mx-auto max-w-2xl text-center">
           <span className="text-sm font-extrabold uppercase tracking-wide text-secondary">
-            Kids' Nook
+            Kids&#39; Nook
