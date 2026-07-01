@@ -26,7 +26,7 @@ export function Navbar() {
           />
           <span className="flex flex-col leading-none">
             <span className="font-display text-lg font-extrabold text-primary sm:text-xl">
-              KIDS' NOOK
+              {"KIDS\u2019 Nook"}
             </span>
             <span className="text-[10px] font-bold uppercase tracking-wider text-secondary">
               Play · Create · Get Pampered
