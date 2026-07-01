@@ -1,32 +1,73 @@
 import { Instagram } from "lucide-react";
 import { INSTAGRAM_URL } from "@/lib/site-data";
+import logo from "@/assets/logo.jpeg";
 import girl from "@/assets/girl-glasses.png";
 import mother from "@/assets/mother-child.png";
 import birthday from "@/assets/birthday.png";
-import gaming from "@/assets/gaming.jpg";
-import library from "@/assets/library.jpg";
-import outdoor from "@/assets/outdoor.jpg";
-import creative from "@/assets/creative.jpg";
-import hair from "@/assets/hair.jpg";
+import loyaltyPoster from "@/assets/loyalty-poster.png";
+import happyKid from "@/assets/happy-kid.png";
+import kidsPlaying from "@/assets/kids-playing.png";
 
 const items = [
-  { src: hair, cat: "Hairstyles", tall: false },
-  { src: girl, cat: "Happy Kids", tall: true },
-  { src: gaming, cat: "Gaming Lounge", tall: false },
-  { src: library, cat: "Reading Corner", tall: true },
-  { src: outdoor, cat: "Outdoor Fun", tall: false },
-  { src: creative, cat: "Activities", tall: true },
-  { src: birthday, cat: "Birthday Events", tall: false },
-  { src: mother, cat: "Happy Kids", tall: false },
+  {
+    src: girl,
+    cat: "Happy Kids",
+    alt: "Smiling girl with braided hair and colorful glasses at Kids' Nook",
+    tall: true,
+    contain: false,
+  },
+  {
+    src: mother,
+    cat: "Family Moments",
+    alt: "Mother and child taking a selfie together at Kids' Nook",
+    tall: true,
+    contain: false,
+  },
+  {
+    src: birthday,
+    cat: "Birthday Events",
+    alt: "Birthday celebration setup at Kids' Nook",
+    tall: true,
+    contain: false,
+  },
+  {
+    src: loyaltyPoster,
+    cat: "Loyalty Program",
+    alt: "KIDS' NOOK loyalty program poster",
+    tall: false,
+    contain: false,
+  },
+  {
+    src: happyKid,
+    cat: "Styled Looks",
+    alt: "Happy child with purple braids and glasses at Kids' Nook",
+    tall: true,
+    contain: false,
+  },
+  {
+    src: kidsPlaying,
+    cat: "Outdoor Fun",
+    alt: "Children playing on outdoor equipment at Kids' Nook",
+    tall: true,
+    contain: false,
+  },
+  {
+    src: logo,
+    cat: "KIDS' NOOK",
+    alt: "KIDS' NOOK brand logo",
+    tall: false,
+    contain: true,
+  },
 ];
 
 const categories = [
-  "Hairstyles",
   "Happy Kids",
-  "Activities",
-  "Reading Corner",
+  "Family Moments",
+  "Birthday Events",
+  "Loyalty Program",
+  "Styled Looks",
   "Outdoor Fun",
-  "Gaming Lounge",
+  "KIDS' NOOK",
 ];
 
 export function Gallery() {
@@ -52,18 +93,22 @@ export function Gallery() {
         ))}
       </div>
 
-      <div className="mt-10 columns-2 gap-4 lg:columns-3 [&>*]:mb-4">
+      <div className="mt-10 columns-1 gap-4 sm:columns-2 lg:columns-3 [&>*]:mb-4">
         {items.map((it, i) => (
           <figure
             key={i}
-            className="group relative break-inside-avoid overflow-hidden rounded-3xl shadow-soft"
+            className="group relative break-inside-avoid overflow-hidden rounded-3xl bg-muted shadow-soft"
           >
             <img
               src={it.src}
-              alt={`${it.cat} at Kids' Nook`}
+              alt={it.alt}
               loading="lazy"
-              className={`w-full object-cover transition-transform duration-500 group-hover:scale-105 ${
-                it.tall ? "aspect-[3/4]" : "aspect-square"
+              className={`w-full transition-transform duration-500 group-hover:scale-105 ${
+                it.contain
+                  ? "aspect-square object-contain bg-background p-6"
+                  : it.tall
+                    ? "aspect-[3/4] object-cover"
+                    : "aspect-square object-cover"
               }`}
             />
             <figcaption className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-foreground/70 to-transparent p-4">

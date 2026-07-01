@@ -1,17 +1,20 @@
 import { MapPin, Clock, Instagram, Phone } from "lucide-react";
 import { INSTAGRAM_URL, WHATSAPP_NUMBER } from "@/lib/site-data";
+import logo from "@/assets/logo.jpeg";
 
 export function Footer() {
   return (
     <footer id="visit" className="bg-foreground text-background">
       <div className="mx-auto grid max-w-7xl gap-10 px-5 py-14 lg:grid-cols-3">
         <div>
-          <div className="flex items-center gap-2">
-            <span className="grid h-10 w-10 place-items-center rounded-2xl bg-gradient-hero text-lg font-extrabold text-primary-foreground">
-              K
-            </span>
+          <div className="flex items-center gap-3">
+            <img
+              src={logo}
+              alt="KIDS' NOOK logo"
+              className="h-14 w-14 rounded-2xl object-cover"
+            />
             <span className="font-display text-2xl font-extrabold text-background">
-              Kids' Nook
+              KIDS' NOOK
             </span>
           </div>
           <p className="mt-4 max-w-xs font-medium text-background/70">
@@ -77,7 +80,7 @@ export function Footer() {
       </div>
 
       <div className="border-t border-background/10 py-5 text-center text-sm text-background/60">
-        © {new Date().getFullYear()} Kids' Nook · Play. Create. Get Pampered.
+        © {new Date().getFullYear()} KIDS' NOOK · Play. Create. Get Pampered.
       </div>
     </footer>
   );

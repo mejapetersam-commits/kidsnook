@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import logo from "@/assets/logo.jpeg";
 
 const links = [
   { label: "About", href: "#about" },
@@ -17,13 +18,15 @@ export function Navbar() {
   return (
     <header className="sticky top-0 z-50 border-b border-border/60 bg-background/85 backdrop-blur-md">
       <nav className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-3">
-        <a href="#top" className="flex shrink-0 items-center gap-2">
-          <span className="grid h-10 w-10 place-items-center rounded-2xl bg-gradient-hero text-lg font-extrabold text-primary-foreground">
-            K
-          </span>
+        <a href="#top" className="flex shrink-0 items-center gap-3">
+          <img
+            src={logo}
+            alt="KIDS' NOOK logo"
+            className="h-12 w-12 rounded-2xl object-cover sm:h-14 sm:w-14"
+          />
           <span className="flex flex-col leading-none">
-            <span className="font-display text-xl font-extrabold text-primary">
-              Kids' Nook
+            <span className="font-display text-lg font-extrabold text-primary sm:text-xl">
+              KIDS' NOOK
             </span>
             <span className="text-[10px] font-bold uppercase tracking-wider text-secondary">
               Play · Create · Get Pampered

@@ -6,7 +6,7 @@ export function About() {
       <div className="mx-auto grid max-w-7xl items-center gap-10 px-5 py-16 lg:grid-cols-2 lg:py-24">
         <div className="relative">
           <img
-            src={mother.url}
+            src={mother}
             alt="Mother and child taking a happy selfie at Kids' Nook"
             width={1000}
             height={900}
