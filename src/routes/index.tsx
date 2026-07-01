@@ -39,7 +39,9 @@ function Index() {
         <Hero />
         <About />
         <Services />
+        <NannyMe />
         <Loyalty />
+        <Shop />
         <Gallery />
         <WhyParents />
         <Testimonials />
