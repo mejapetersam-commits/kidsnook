@@ -19,7 +19,7 @@ export function Shop() {
       <div className="mx-auto max-w-7xl px-5 py-16 lg:py-24">
         <div className="mx-auto max-w-2xl text-center">
           <span className="text-sm font-extrabold uppercase tracking-wide text-secondary">
-            Kids&#39; Nook Shop
+            {"KIDS\u2019 NOOK Shop"}
           </span>
           <h2 className="mt-3 font-display text-3xl font-extrabold text-foreground sm:text-4xl">
             Take the Fun Home
@@ -33,7 +33,7 @@ export function Shop() {
           <div className="flex items-center justify-between px-8 py-6">
             <div>
               <p className="text-xs font-extrabold uppercase tracking-wide text-secondary">One Category</p>
-              <h3 className="mt-1 font-display text-2xl font-extrabold text-foreground">Kids&#39; Nook Store</h3>
+              <h3 className="mt-1 font-display text-2xl font-extrabold text-foreground">{"KIDS\u2019 NOOK Store"}</h3>
               <p className="mt-1 text-sm font-medium text-muted-foreground">{products.length} products available</p>
             </div>
             <Button variant="hero" size="lg" onClick={() => setOpen(true)} className="gap-2">
@@ -60,7 +60,7 @@ export function Shop() {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="mb-6 flex items-center justify-between">
-              <h3 className="font-display text-2xl font-extrabold text-foreground">Kids&#39; Nook Store</h3>
+              <h3 className="font-display text-2xl font-extrabold text-foreground">{"KIDS\u2019 NOOK Store"}</h3>
               <button
                 onClick={() => setOpen(false)}
                 className="grid h-9 w-9 place-items-center rounded-full bg-muted transition hover:bg-muted/80"
