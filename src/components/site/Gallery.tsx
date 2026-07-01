@@ -10,12 +10,12 @@ import happyKid from "@/assets/happy-kid.png";
 import kidsPlaying from "@/assets/kids-playing.png";
 
 const items = [
-  { src: girl, cat: "Happy Kids", alt: "Smiling girl with braided hair and colorful glasses at Kids' Nook" },
-  { src: mother, cat: "Family Moments", alt: "Mother and child taking a selfie together at Kids' Nook" },
-  { src: birthday, cat: "Birthday Events", alt: "Birthday celebration setup at Kids' Nook" },
+  { src: girl, cat: "Happy Kids", alt: "Smiling girl with braided hair and colorful glasses at Kids Nook" },
+  { src: mother, cat: "Family Moments", alt: "Mother and child taking a selfie together at Kids Nook" },
+  { src: birthday, cat: "Birthday Events", alt: "Birthday celebration setup at Kids Nook" },
   { src: loyaltyPoster, cat: "Loyalty Program", alt: "KIDS NOOK loyalty program poster" },
-  { src: happyKid, cat: "Styled Looks", alt: "Happy child with purple braids and glasses at Kids' Nook" },
-  { src: kidsPlaying, cat: "Outdoor Fun", alt: "Children playing on outdoor equipment at Kids' Nook" },
+  { src: happyKid, cat: "Styled Looks", alt: "Happy child with purple braids and glasses at Kids Nook" },
+  { src: kidsPlaying, cat: "Outdoor Fun", alt: "Children playing on outdoor equipment at Kids Nook" },
   { src: logo, cat: "KIDS NOOK", alt: "KIDS NOOK brand logo" },
 ];
 
