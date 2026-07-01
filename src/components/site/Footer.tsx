@@ -80,7 +80,7 @@ export function Footer() {
       </div>
 
       <div className="border-t border-background/10 py-5 text-center text-sm text-background/60">
-        © {new Date().getFullYear()} KIDS' NOOK · Play. Create. Get Pampered.
+        © {new Date().getFullYear()} {"KIDS\u2019 Nook"} · Play. Create. Get Pampered.
       </div>
     </footer>
   );
