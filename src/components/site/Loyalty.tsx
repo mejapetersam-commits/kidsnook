@@ -25,7 +25,7 @@ export function Loyalty() {
             </div>
             <div className="h-full">
               <img
-                src={loyalty.url}
+                src={loyalty}
                 alt="Kids' Nook loyalty program — visit 5, get the 6th free"
                 width={1000}
                 height={1100}
