@@ -14,7 +14,7 @@ export function Footer() {
               className="h-14 w-14 rounded-2xl object-cover"
             />
             <span className="font-display text-2xl font-extrabold text-background">
-              KIDS' NOOK
+              {"KIDS\u2019 Nook"}
             </span>
           </div>
           <p className="mt-4 max-w-xs font-medium text-background/70">
