@@ -88,7 +88,7 @@ export function Gallery() {
       </div>
 
       <div className="mt-10 text-center">
-        
+        <a
           href={INSTAGRAM_URL}
           target="_blank"
           rel="noopener noreferrer"
