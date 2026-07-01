@@ -1,3 +1,4 @@
+// gallery-slideshow-v2
 import { useState, useEffect, useCallback } from "react";
 import { ChevronLeft, ChevronRight, Instagram } from "lucide-react";
 import { INSTAGRAM_URL } from "@/lib/site-data";
