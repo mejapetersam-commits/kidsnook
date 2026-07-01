@@ -11,13 +11,13 @@ import hair from "@/assets/hair.jpg";
 
 const items = [
   { src: hair, cat: "Hairstyles", tall: false },
-  { src: girl.url, cat: "Happy Kids", tall: true },
+  { src: girl, cat: "Happy Kids", tall: true },
   { src: gaming, cat: "Gaming Lounge", tall: false },
   { src: library, cat: "Reading Corner", tall: true },
   { src: outdoor, cat: "Outdoor Fun", tall: false },
   { src: creative, cat: "Activities", tall: true },
-  { src: birthday.url, cat: "Birthday Events", tall: false },
-  { src: mother.url, cat: "Happy Kids", tall: false },
+  { src: birthday, cat: "Birthday Events", tall: false },
+  { src: mother, cat: "Happy Kids", tall: false },
 ];
 
 const categories = [
