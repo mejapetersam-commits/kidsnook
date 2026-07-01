@@ -22,7 +22,7 @@ export const services = [
     color: "primary" as const,
     blurb: "Expert styling that keeps your little one looking fabulous.",
     items: [
-      "Braiding",
+      "Braiding", 
       "Cornrows",
       "Haircuts",
       "Natural Hair Care",
