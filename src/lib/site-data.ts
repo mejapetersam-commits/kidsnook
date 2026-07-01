@@ -1,4 +1,4 @@
-import {
+import { 
   Scissors,
   Gamepad2,
   BookOpen,
