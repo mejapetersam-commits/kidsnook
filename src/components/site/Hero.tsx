@@ -53,7 +53,7 @@ export function Hero() {
           <div className="relative">
             <div className="absolute -inset-3 -rotate-2 rounded-[2.5rem] bg-gradient-hero opacity-90" />
             <img
-              src={girl.url}
+              src={girl}
               alt="Smiling young girl with braided hair and colorful glasses at Kids' Nook"
               width={1200}
               height={900}
