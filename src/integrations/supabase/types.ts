@@ -14,13 +14,137 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      bookings: {
+        Row: {
+          booking_date: string | null
+          booking_time: string | null
+          child_id: string | null
+          created_at: string
+          id: string
+          membership_number: string
+          parent_id: string | null
+          service: string
+          status: string
+          waiver_accepted: boolean
+        }
+        Insert: {
+          booking_date?: string | null
+          booking_time?: string | null
+          child_id?: string | null
+          created_at?: string
+          id?: string
+          membership_number: string
+          parent_id?: string | null
+          service: string
+          status?: string
+          waiver_accepted?: boolean
+        }
+        Update: {
+          booking_date?: string | null
+          booking_time?: string | null
+          child_id?: string | null
+          created_at?: string
+          id?: string
+          membership_number?: string
+          parent_id?: string | null
+          service?: string
+          status?: string
+          waiver_accepted?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bookings_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "children"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookings_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "parents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      children: {
+        Row: {
+          allergies: string | null
+          created_at: string
+          dob: string | null
+          first_name: string
+          id: string
+          last_name: string
+          membership_number: string
+          parent_id: string
+          sex: string | null
+        }
+        Insert: {
+          allergies?: string | null
+          created_at?: string
+          dob?: string | null
+          first_name: string
+          id?: string
+          last_name: string
+          membership_number?: string
+          parent_id: string
+          sex?: string | null
+        }
+        Update: {
+          allergies?: string | null
+          created_at?: string
+          dob?: string | null
+          first_name?: string
+          id?: string
+          last_name?: string
+          membership_number?: string
+          parent_id?: string
+          sex?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "children_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "parents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      parents: {
+        Row: {
+          created_at: string
+          email: string | null
+          emergency_contact: string | null
+          id: string
+          name: string
+          phone: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          emergency_contact?: string | null
+          id?: string
+          name: string
+          phone: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          emergency_contact?: string | null
+          id?: string
+          name?: string
+          phone?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      next_membership_number: { Args: never; Returns: string }
     }
     Enums: {
       [_ in never]: never
