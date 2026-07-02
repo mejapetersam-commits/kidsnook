@@ -1,20 +1,27 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { createClient } from "@supabase/supabase-js";
+import type { Database } from "@/integrations/supabase/types";
 
-// ⚠️ TODO: Replace this hardcoded admin password with real authentication
-// (e.g. Lovable Cloud auth + an admin role) before going to production.
-const ADMIN_PASSWORD = "kidsnook2024";
+// NOTE: Access control lives in the database (SECURITY DEFINER functions).
+// The member/parent/booking tables are fully locked (RLS, no public policies);
+// only the vetted RPC functions below can touch them. Admin RPCs verify the
+// admin password inside the database.
+// ⚠️ TODO: The admin password is currently hardcoded in the database function
+// `_admin_password()`. Replace it with real admin authentication/roles later.
 
-function assertAdmin(password: string) {
-  if (password !== ADMIN_PASSWORD) {
-    throw new Error("Unauthorized");
-  }
+function db() {
+  return createClient<Database>(
+    process.env.SUPABASE_URL!,
+    process.env.SUPABASE_PUBLISHABLE_KEY!,
+    { auth: { storage: undefined, persistSession: false, autoRefreshToken: false } },
+  );
 }
 
 const parentSchema = z.object({
   name: z.string().trim().min(1).max(120),
   phone: z.string().trim().min(1).max(40),
-  email: z.string().trim().email().max(255).optional().or(z.literal("")),
+  email: z.string().trim().max(255).optional().or(z.literal("")),
   emergency_contact: z.string().trim().max(120).optional().or(z.literal("")),
 });
 
@@ -26,82 +33,7 @@ const childSchema = z.object({
   allergies: z.string().trim().max(500).optional().or(z.literal("")),
 });
 
-const registrationSchema = z.object({
-  parent: parentSchema,
-  child: childSchema,
-});
-
-async function createMember(input: z.infer<typeof registrationSchema>) {
-  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-
-  const { data: parent, error: parentErr } = await supabaseAdmin
-    .from("parents")
-    .insert({
-      name: input.parent.name,
-      phone: input.parent.phone,
-      email: input.parent.email || null,
-      emergency_contact: input.parent.emergency_contact || null,
-    })
-    .select()
-    .single();
-  if (parentErr || !parent) throw new Error(parentErr?.message || "Failed to save parent");
-
-  const { data: child, error: childErr } = await supabaseAdmin
-    .from("children")
-    .insert({
-      parent_id: parent.id,
-      first_name: input.child.first_name,
-      last_name: input.child.last_name,
-      dob: input.child.dob || null,
-      sex: input.child.sex || null,
-      allergies: input.child.allergies || null,
-    })
-    .select()
-    .single();
-  if (childErr || !child) throw new Error(childErr?.message || "Failed to save child");
-
-  return { parent, child };
-}
-
-// ---------- Registration ----------
-export const registerMember = createServerFn({ method: "POST" })
-  .inputValidator((data: unknown) => registrationSchema.parse(data))
-  .handler(async ({ data }) => {
-    const { child } = await createMember(data);
-    // 📱 TODO: Integrate SMS/email delivery here to send the Membership Number
-    // to the parent (e.g. via an SMS gateway or email provider).
-    return { membershipNumber: child.membership_number };
-  });
-
-// ---------- Member lookup (for existing-member booking) ----------
-export const lookupMember = createServerFn({ method: "POST" })
-  .inputValidator((data: unknown) =>
-    z.object({ membership_number: z.string().trim().min(1).max(20) }).parse(data),
-  )
-  .handler(async ({ data }) => {
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: child, error } = await supabaseAdmin
-      .from("children")
-      .select("id, first_name, last_name, membership_number, parent_id, parents(id, name, phone, email)")
-      .eq("membership_number", data.membership_number.toUpperCase())
-      .maybeSingle();
-    if (error) throw new Error(error.message);
-    if (!child) return { found: false as const };
-    const parent = Array.isArray(child.parents) ? child.parents[0] : child.parents;
-    return {
-      found: true as const,
-      child: {
-        id: child.id,
-        first_name: child.first_name,
-        last_name: child.last_name,
-        membership_number: child.membership_number,
-        parent_id: child.parent_id,
-      },
-      parent: parent
-        ? { id: parent.id, name: parent.name, phone: parent.phone, email: parent.email }
-        : null,
-    };
-  });
+const registrationSchema = z.object({ parent: parentSchema, child: childSchema });
 
 const bookingDetailsSchema = z.object({
   service: z.string().trim().min(1).max(120),
@@ -110,163 +42,151 @@ const bookingDetailsSchema = z.object({
   waiver_accepted: z.boolean(),
 });
 
+// ---------- Registration ----------
+export const registerMember = createServerFn({ method: "POST" })
+  .inputValidator((data: unknown) => registrationSchema.parse(data))
+  .handler(async ({ data }) => {
+    const { data: mnum, error } = await db().rpc("app_register_member", {
+      p_parent: data.parent,
+      p_child: data.child,
+    });
+    if (error) throw new Error(error.message);
+    // 📱 TODO: Integrate SMS/email delivery here to send the Membership Number.
+    return { membershipNumber: mnum as string };
+  });
+
+// ---------- Member lookup ----------
+type LookupResult =
+  | { found: false }
+  | {
+      found: true;
+      child: { id: string; first_name: string; last_name: string; membership_number: string };
+      parent: { name: string } | null;
+    };
+
+export const lookupMember = createServerFn({ method: "POST" })
+  .inputValidator((data: unknown) =>
+    z.object({ membership_number: z.string().trim().min(1).max(20) }).parse(data),
+  )
+  .handler(async ({ data }) => {
+    const { data: res, error } = await db().rpc("app_lookup_member", {
+      p_mnum: data.membership_number,
+    });
+    if (error) throw new Error(error.message);
+    return res as unknown as LookupResult;
+  });
+
 // ---------- Existing member booking ----------
 export const createBooking = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) =>
-    bookingDetailsSchema
-      .extend({ membership_number: z.string().trim().min(1).max(20) })
-      .parse(data),
+    bookingDetailsSchema.extend({ membership_number: z.string().trim().min(1).max(20) }).parse(data),
   )
   .handler(async ({ data }) => {
-    if (!data.waiver_accepted) throw new Error("Indemnity waiver must be accepted");
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-
-    const { data: child, error: lookupErr } = await supabaseAdmin
-      .from("children")
-      .select("id, parent_id, membership_number")
-      .eq("membership_number", data.membership_number.toUpperCase())
-      .maybeSingle();
-    if (lookupErr) throw new Error(lookupErr.message);
-    if (!child) throw new Error("Membership number not found");
-
-    const { error } = await supabaseAdmin.from("bookings").insert({
-      membership_number: child.membership_number,
-      child_id: child.id,
-      parent_id: child.parent_id,
-      service: data.service,
-      booking_date: data.booking_date || null,
-      booking_time: data.booking_time || null,
-      waiver_accepted: data.waiver_accepted,
+    const { data: mnum, error } = await db().rpc("app_create_booking", {
+      p_mnum: data.membership_number,
+      p_service: data.service,
+      p_date: data.booking_date ?? "",
+      p_time: data.booking_time ?? "",
+      p_waiver: data.waiver_accepted,
     });
     if (error) throw new Error(error.message);
     // 📱 TODO: Integrate SMS/email confirmation of the booking here.
-    return { ok: true, membershipNumber: child.membership_number };
+    return { ok: true as const, membershipNumber: mnum as string };
   });
 
-// ---------- New client: register + book in one step ----------
+// ---------- New client: register + book ----------
 export const registerAndBook = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) =>
     registrationSchema.extend({ booking: bookingDetailsSchema }).parse(data),
   )
   .handler(async ({ data }) => {
-    if (!data.booking.waiver_accepted) throw new Error("Indemnity waiver must be accepted");
-    const { child, parent } = await createMember({ parent: data.parent, child: data.child });
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-
-    const { error } = await supabaseAdmin.from("bookings").insert({
-      membership_number: child.membership_number,
-      child_id: child.id,
-      parent_id: parent.id,
-      service: data.booking.service,
-      booking_date: data.booking.booking_date || null,
-      booking_time: data.booking.booking_time || null,
-      waiver_accepted: data.booking.waiver_accepted,
+    const { data: mnum, error } = await db().rpc("app_register_and_book", {
+      p_parent: data.parent,
+      p_child: data.child,
+      p_service: data.booking.service,
+      p_date: data.booking.booking_date ?? "",
+      p_time: data.booking.booking_time ?? "",
+      p_waiver: data.booking.waiver_accepted,
     });
     if (error) throw new Error(error.message);
     // 📱 TODO: Integrate SMS/email delivery of the Membership Number + booking here.
-    return { membershipNumber: child.membership_number };
+    return { membershipNumber: mnum as string };
   });
 
 // ---------- Admin ----------
+export type AdminOverview = {
+  totalMembers: number;
+  totalBookings: number;
+  recentRegistrations: {
+    id: string;
+    membership_number: string;
+    name: string;
+    parent: string;
+    phone: string;
+    created_at: string;
+  }[];
+  recentBookings: {
+    id: string;
+    membership_number: string;
+    service: string;
+    booking_date: string | null;
+    booking_time: string | null;
+    status: string;
+    created_at: string;
+  }[];
+};
+
+export type AdminMember = {
+  id: string;
+  membership_number: string;
+  first_name: string;
+  last_name: string;
+  dob: string | null;
+  sex: string | null;
+  allergies: string | null;
+  created_at: string;
+  parent_name: string;
+  parent_phone: string;
+  parent_email: string;
+  emergency_contact: string;
+};
+
+export type AdminBooking = {
+  id: string;
+  membership_number: string;
+  child_name: string;
+  parent_name: string;
+  parent_phone: string;
+  service: string;
+  booking_date: string | null;
+  booking_time: string | null;
+  status: string;
+  waiver_accepted: boolean;
+  created_at: string;
+};
+
 export const adminGetOverview = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => z.object({ password: z.string() }).parse(data))
   .handler(async ({ data }) => {
-    assertAdmin(data.password);
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-
-    const [membersCount, bookingsCount, recentRegs, recentBookings] = await Promise.all([
-      supabaseAdmin.from("children").select("*", { count: "exact", head: true }),
-      supabaseAdmin.from("bookings").select("*", { count: "exact", head: true }),
-      supabaseAdmin
-        .from("children")
-        .select("id, membership_number, first_name, last_name, created_at, parents(name, phone)")
-        .order("created_at", { ascending: false })
-        .limit(10),
-      supabaseAdmin
-        .from("bookings")
-        .select("id, membership_number, service, booking_date, booking_time, status, created_at")
-        .order("created_at", { ascending: false })
-        .limit(10),
-    ]);
-
-    return {
-      totalMembers: membersCount.count ?? 0,
-      totalBookings: bookingsCount.count ?? 0,
-      recentRegistrations: (recentRegs.data ?? []).map((r) => {
-        const p = Array.isArray(r.parents) ? r.parents[0] : r.parents;
-        return {
-          id: r.id,
-          membership_number: r.membership_number,
-          name: `${r.first_name} ${r.last_name}`,
-          parent: p?.name ?? "",
-          phone: p?.phone ?? "",
-          created_at: r.created_at,
-        };
-      }),
-      recentBookings: recentBookings.data ?? [],
-    };
+    const { data: res, error } = await db().rpc("app_admin_overview", { p_password: data.password });
+    if (error) throw new Error(error.message);
+    return res as unknown as AdminOverview;
   });
 
 export const adminListMembers = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => z.object({ password: z.string() }).parse(data))
   .handler(async ({ data }) => {
-    assertAdmin(data.password);
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: rows, error } = await supabaseAdmin
-      .from("children")
-      .select(
-        "id, membership_number, first_name, last_name, dob, sex, allergies, created_at, parents(name, phone, email, emergency_contact)",
-      )
-      .order("created_at", { ascending: false });
+    const { data: res, error } = await db().rpc("app_admin_members", { p_password: data.password });
     if (error) throw new Error(error.message);
-    return (rows ?? []).map((r) => {
-      const p = Array.isArray(r.parents) ? r.parents[0] : r.parents;
-      return {
-        id: r.id,
-        membership_number: r.membership_number,
-        first_name: r.first_name,
-        last_name: r.last_name,
-        dob: r.dob,
-        sex: r.sex,
-        allergies: r.allergies,
-        created_at: r.created_at,
-        parent_name: p?.name ?? "",
-        parent_phone: p?.phone ?? "",
-        parent_email: p?.email ?? "",
-        emergency_contact: p?.emergency_contact ?? "",
-      };
-    });
+    return res as unknown as AdminMember[];
   });
 
 export const adminListBookings = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => z.object({ password: z.string() }).parse(data))
   .handler(async ({ data }) => {
-    assertAdmin(data.password);
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: rows, error } = await supabaseAdmin
-      .from("bookings")
-      .select(
-        "id, membership_number, service, booking_date, booking_time, status, waiver_accepted, created_at, children(first_name, last_name), parents(name, phone)",
-      )
-      .order("created_at", { ascending: false });
+    const { data: res, error } = await db().rpc("app_admin_bookings", { p_password: data.password });
     if (error) throw new Error(error.message);
-    return (rows ?? []).map((r) => {
-      const c = Array.isArray(r.children) ? r.children[0] : r.children;
-      const p = Array.isArray(r.parents) ? r.parents[0] : r.parents;
-      return {
-        id: r.id,
-        membership_number: r.membership_number,
-        child_name: c ? `${c.first_name} ${c.last_name}` : "",
-        parent_name: p?.name ?? "",
-        parent_phone: p?.phone ?? "",
-        service: r.service,
-        booking_date: r.booking_date,
-        booking_time: r.booking_time,
-        status: r.status,
-        waiver_accepted: r.waiver_accepted,
-        created_at: r.created_at,
-      };
-    });
+    return res as unknown as AdminBooking[];
   });
 
 export const adminUpdateBookingStatus = createServerFn({ method: "POST" })
@@ -280,12 +200,11 @@ export const adminUpdateBookingStatus = createServerFn({ method: "POST" })
       .parse(data),
   )
   .handler(async ({ data }) => {
-    assertAdmin(data.password);
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin
-      .from("bookings")
-      .update({ status: data.status })
-      .eq("id", data.id);
+    const { error } = await db().rpc("app_admin_update_booking", {
+      p_password: data.password,
+      p_id: data.id,
+      p_status: data.status,
+    });
     if (error) throw new Error(error.message);
-    return { ok: true };
+    return { ok: true as const };
   });
