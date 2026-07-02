@@ -2,12 +2,12 @@
   "hash": "9c07af8e",
   "configHash": "7b4dbcfc",
   "lockfileHash": "c75f068d",
-  "browserHash": "3632d189",
+  "browserHash": "dbaf524b",
   "optimized": {
     "@radix-ui/react-checkbox": {
       "src": "../../node_modules/@radix-ui/react-checkbox/dist/index.mjs",
       "file": "@radix-ui_react-checkbox.js",
-      "fileHash": "93371400",
+      "fileHash": "48ee699b",
       "needsInterop": false
     },
     "@radix-ui/react-label": {
@@ -19,13 +19,19 @@
     "@radix-ui/react-select": {
       "src": "../../node_modules/@radix-ui/react-select/dist/index.mjs",
       "file": "@radix-ui_react-select.js",
-      "fileHash": "63c04c08",
+      "fileHash": "1fc6866c",
       "needsInterop": false
     },
     "@radix-ui/react-slot": {
       "src": "../../node_modules/@radix-ui/react-slot/dist/index.mjs",
       "file": "@radix-ui_react-slot.js",
       "fileHash": "5f133222",
+      "needsInterop": false
+    },
+    "@radix-ui/react-tabs": {
+      "src": "../../node_modules/@radix-ui/react-tabs/dist/index.mjs",
+      "file": "@radix-ui_react-tabs.js",
+      "fileHash": "0b1bdef3",
       "needsInterop": false
     },
     "@supabase/supabase-js": {
@@ -142,8 +148,20 @@
       "file": "chunk-B-1-B7_t.js",
       "isDynamicEntry": false
     },
-    "dist-CLaUilZF": {
-      "file": "dist-CLaUilZF.js",
+    "dist-C0m8Ak61": {
+      "file": "dist-C0m8Ak61.js",
+      "isDynamicEntry": false
+    },
+    "dist-CSg9vFiG": {
+      "file": "dist-CSg9vFiG.js",
+      "isDynamicEntry": false
+    },
+    "dist-Cn7qmohu": {
+      "file": "dist-Cn7qmohu.js",
+      "isDynamicEntry": false
+    },
+    "dist-OVLJqcYV": {
+      "file": "dist-OVLJqcYV.js",
       "isDynamicEntry": false
     },
     "dist-b22gqORC": {
