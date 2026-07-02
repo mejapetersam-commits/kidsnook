@@ -241,7 +241,7 @@ export function Booking() {
                       </p>
                       {lookedUp.parent && (
                         <p className="text-sm font-medium text-muted-foreground">
-                          Parent: {lookedUp.parent.name} · {lookedUp.parent.phone}
+                          Parent: {lookedUp.parent.name}
                         </p>
                       )}
                     </div>
