@@ -1,5 +1,6 @@
 "use client";
-import { i as __toESM, t as require_react } from "./react-QWdP705l.js";
+import { r as __toESM } from "./chunk-B-1-B7_t.js";
+import { t as require_react } from "./react.js";
 import { t as require_react_dom } from "./react-dom.js";
 //#region node_modules/sonner/dist/index.mjs
 var import_react = /* @__PURE__ */ __toESM(require_react(), 1);

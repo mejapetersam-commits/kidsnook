@@ -1,7 +1,8 @@
 "use client";
-import { i as __toESM, t as require_react } from "./react-QWdP705l.js";
-import { t as require_react_dom } from "./react-dom.js";
+import { r as __toESM } from "./chunk-B-1-B7_t.js";
+import { t as require_react } from "./react.js";
 import { t as require_jsx_runtime } from "./react_jsx-runtime.js";
+import { t as require_react_dom } from "./react-dom.js";
 import { createSlot } from "./@radix-ui_react-slot.js";
 //#region node_modules/@radix-ui/react-label/node_modules/@radix-ui/react-primitive/dist/index.mjs
 var import_react = /* @__PURE__ */ __toESM(require_react(), 1);
