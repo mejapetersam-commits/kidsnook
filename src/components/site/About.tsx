@@ -35,7 +35,7 @@ export function About() {
             {[
               { n: "5", l: "Fun Zones" },
               { n: "100%", l: "Kid-Safe" },
-              { n: "7", l: "Days a Week" },
+              { n: "6", l: "Days a Week" },
             ].map((s) => (
               <div key={s.l} className="rounded-2xl bg-background p-4 text-center shadow-soft">
                 <p className="font-display text-2xl font-extrabold text-primary">{s.n}</p>
