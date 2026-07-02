@@ -6,6 +6,13 @@ export default defineConfig({
     server: { entry: "server" },
   },
   vite: {
-    cacheDir: ".vite-no-cache",
+    build: {
+      rollupOptions: {
+        output: {
+          chunkFileNames: `assets/[name]-[hash]-${Date.now()}.js`,
+          entryFileNames: `assets/[name]-[hash]-${Date.now()}.js`,
+        },
+      },
+    },
   },
 });
