@@ -144,6 +144,40 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      _admin_password: { Args: never; Returns: string }
+      app_admin_bookings: { Args: { p_password: string }; Returns: Json }
+      app_admin_members: { Args: { p_password: string }; Returns: Json }
+      app_admin_overview: { Args: { p_password: string }; Returns: Json }
+      app_admin_update_booking: {
+        Args: { p_id: string; p_password: string; p_status: string }
+        Returns: undefined
+      }
+      app_create_booking: {
+        Args: {
+          p_date: string
+          p_mnum: string
+          p_service: string
+          p_time: string
+          p_waiver: boolean
+        }
+        Returns: string
+      }
+      app_lookup_member: { Args: { p_mnum: string }; Returns: Json }
+      app_register_and_book: {
+        Args: {
+          p_child: Json
+          p_date: string
+          p_parent: Json
+          p_service: string
+          p_time: string
+          p_waiver: boolean
+        }
+        Returns: string
+      }
+      app_register_member: {
+        Args: { p_child: Json; p_parent: Json }
+        Returns: string
+      }
       next_membership_number: { Args: never; Returns: string }
     }
     Enums: {
