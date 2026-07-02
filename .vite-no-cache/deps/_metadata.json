@@ -1,97 +1,103 @@
 {
-  "hash": "f001cbf0",
+  "hash": "9c07af8e",
   "configHash": "7b4dbcfc",
-  "lockfileHash": "2db987c7",
-  "browserHash": "5c0ee619",
+  "lockfileHash": "c75f068d",
+  "browserHash": "a09e0992",
   "optimized": {
     "@radix-ui/react-label": {
       "src": "../../node_modules/@radix-ui/react-label/dist/index.mjs",
       "file": "@radix-ui_react-label.js",
-      "fileHash": "78aba06f",
+      "fileHash": "5983b07a",
       "needsInterop": false
     },
     "@radix-ui/react-select": {
       "src": "../../node_modules/@radix-ui/react-select/dist/index.mjs",
       "file": "@radix-ui_react-select.js",
-      "fileHash": "48a1bebc",
+      "fileHash": "e52e929a",
       "needsInterop": false
     },
     "@radix-ui/react-slot": {
       "src": "../../node_modules/@radix-ui/react-slot/dist/index.mjs",
       "file": "@radix-ui_react-slot.js",
-      "fileHash": "ed4bd0b5",
+      "fileHash": "94c5837c",
+      "needsInterop": false
+    },
+    "@supabase/supabase-js": {
+      "src": "../../node_modules/@supabase/supabase-js/dist/index.mjs",
+      "file": "@supabase_supabase-js.js",
+      "fileHash": "59849c02",
       "needsInterop": false
     },
     "@tanstack/react-query": {
       "src": "../../node_modules/@tanstack/react-query/build/modern/index.js",
       "file": "@tanstack_react-query.js",
-      "fileHash": "d8fca152",
+      "fileHash": "7669cf51",
       "needsInterop": false
     },
     "@tanstack/react-router > @tanstack/react-store": {
       "src": "../../node_modules/@tanstack/react-store/dist/esm/index.js",
       "file": "@tanstack_react-router_n_@tanstack_react-store.js",
-      "fileHash": "963e6c24",
+      "fileHash": "90ad092b",
       "needsInterop": false
     },
     "class-variance-authority": {
       "src": "../../node_modules/class-variance-authority/dist/index.mjs",
       "file": "class-variance-authority.js",
-      "fileHash": "adddf551",
+      "fileHash": "80abcc94",
       "needsInterop": false
     },
     "clsx": {
       "src": "../../node_modules/clsx/dist/clsx.mjs",
       "file": "clsx.js",
-      "fileHash": "73f5ab1a",
+      "fileHash": "9f9de242",
       "needsInterop": false
     },
     "lucide-react": {
       "src": "../../node_modules/lucide-react/dist/esm/lucide-react.js",
       "file": "lucide-react.js",
-      "fileHash": "54ba8376",
+      "fileHash": "53d3b90d",
       "needsInterop": false
     },
     "react-dom": {
       "src": "../../node_modules/react-dom/index.js",
       "file": "react-dom.js",
-      "fileHash": "413a1551",
+      "fileHash": "a461e21f",
       "needsInterop": true
     },
     "react-dom/client": {
       "src": "../../node_modules/react-dom/client.js",
       "file": "react-dom_client.js",
-      "fileHash": "1e5ae29f",
+      "fileHash": "9446ae56",
       "needsInterop": true
     },
     "react": {
       "src": "../../node_modules/react/index.js",
       "file": "react.js",
-      "fileHash": "cffa8b41",
+      "fileHash": "41e6c8c0",
       "needsInterop": true
     },
     "react/jsx-dev-runtime": {
       "src": "../../node_modules/react/jsx-dev-runtime.js",
       "file": "react_jsx-dev-runtime.js",
-      "fileHash": "076e8445",
+      "fileHash": "0ed3ee01",
       "needsInterop": true
     },
     "react/jsx-runtime": {
       "src": "../../node_modules/react/jsx-runtime.js",
       "file": "react_jsx-runtime.js",
-      "fileHash": "ba8d05b1",
+      "fileHash": "e31fe90d",
       "needsInterop": true
     },
     "sonner": {
       "src": "../../node_modules/sonner/dist/index.mjs",
       "file": "sonner.js",
-      "fileHash": "71e56357",
+      "fileHash": "77e9f9e9",
       "needsInterop": false
     },
     "tailwind-merge": {
       "src": "../../node_modules/tailwind-merge/dist/bundle-mjs.mjs",
       "file": "tailwind-merge.js",
-      "fileHash": "37f6dc62",
+      "fileHash": "ed684544",
       "needsInterop": false
     }
   },
@@ -102,6 +108,10 @@
     },
     "react-QWdP705l": {
       "file": "react-QWdP705l.js",
+      "isDynamicEntry": false
+    },
+    "tslib.es6-B1NP4NDs": {
+      "file": "tslib.es6-B1NP4NDs.js",
       "isDynamicEntry": false
     }
   }
