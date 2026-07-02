@@ -47,7 +47,7 @@ export function Booking() {
   const [membershipInput, setMembershipInput] = useState("");
   const [lookedUp, setLookedUp] = useState<{
     child: { first_name: string; last_name: string; membership_number: string };
-    parent: { name: string; phone: string } | null;
+    parent: { name: string } | null;
   } | null>(null);
   const [lookingUp, setLookingUp] = useState(false);
 
