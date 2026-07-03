@@ -27,6 +27,12 @@ import {
   type ParentForm,
 } from "@/components/site/member-fields";
 import { lookupMember, createBooking, registerAndBook } from "@/lib/members.functions";
+import {
+  ConsentCheckboxes,
+  emptyConsent,
+  validateConsent,
+  type Consent,
+} from "@/components/site/ConsentCheckboxes";
 
 type Mode = null | "member" | "new";
 type BookingDetails = { service: string; booking_date: string; booking_time: string };
