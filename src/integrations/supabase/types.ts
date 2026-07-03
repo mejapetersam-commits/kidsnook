@@ -73,33 +73,48 @@ export type Database = {
           allergies: string | null
           created_at: string
           dob: string | null
+          doctor_name: string | null
+          doctor_phone: string | null
           first_name: string
           id: string
           last_name: string
+          medical_conditions: string | null
           membership_number: string
+          notes: string | null
           parent_id: string
+          service_preferences: string | null
           sex: string | null
         }
         Insert: {
           allergies?: string | null
           created_at?: string
           dob?: string | null
+          doctor_name?: string | null
+          doctor_phone?: string | null
           first_name: string
           id?: string
           last_name: string
+          medical_conditions?: string | null
           membership_number?: string
+          notes?: string | null
           parent_id: string
+          service_preferences?: string | null
           sex?: string | null
         }
         Update: {
           allergies?: string | null
           created_at?: string
           dob?: string | null
+          doctor_name?: string | null
+          doctor_phone?: string | null
           first_name?: string
           id?: string
           last_name?: string
+          medical_conditions?: string | null
           membership_number?: string
+          notes?: string | null
           parent_id?: string
+          service_preferences?: string | null
           sex?: string | null
         }
         Relationships: [
@@ -117,25 +132,43 @@ export type Database = {
           created_at: string
           email: string | null
           emergency_contact: string | null
+          emergency_contact_alt_phone: string | null
+          emergency_contact_name: string | null
+          emergency_contact_phone: string | null
+          emergency_contact_relationship: string | null
+          home_address: string | null
           id: string
           name: string
           phone: string
+          relationship: string | null
         }
         Insert: {
           created_at?: string
           email?: string | null
           emergency_contact?: string | null
+          emergency_contact_alt_phone?: string | null
+          emergency_contact_name?: string | null
+          emergency_contact_phone?: string | null
+          emergency_contact_relationship?: string | null
+          home_address?: string | null
           id?: string
           name: string
           phone: string
+          relationship?: string | null
         }
         Update: {
           created_at?: string
           email?: string | null
           emergency_contact?: string | null
+          emergency_contact_alt_phone?: string | null
+          emergency_contact_name?: string | null
+          emergency_contact_phone?: string | null
+          emergency_contact_relationship?: string | null
+          home_address?: string | null
           id?: string
           name?: string
           phone?: string
+          relationship?: string | null
         }
         Relationships: []
       }
