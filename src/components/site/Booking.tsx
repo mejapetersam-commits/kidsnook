@@ -63,7 +63,7 @@ export function Booking() {
 
   // shared
   const [booking, setBooking] = useState<BookingDetails>(emptyBooking);
-  const [waiver, setWaiver] = useState(false);
+  const [consent, setConsent] = useState<Consent>(emptyConsent);
 
   const memberSteps = ["Membership", "Service", "Confirm"];
   const newSteps = ["Child", "Parent", "Service", "Confirm"];
