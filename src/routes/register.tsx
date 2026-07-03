@@ -19,6 +19,12 @@ import {
   type ParentForm,
 } from "@/components/site/member-fields";
 import { registerMember } from "@/lib/members.functions";
+import {
+  ConsentCheckboxes,
+  emptyConsent,
+  validateConsent,
+  type Consent,
+} from "@/components/site/ConsentCheckboxes";
 
 export const Route = createFileRoute("/register")({
   head: () => ({
