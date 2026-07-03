@@ -77,7 +77,7 @@ export function Booking() {
     setChild(emptyChild);
     setParent(emptyParent);
     setBooking(emptyBooking);
-    setWaiver(false);
+    setConsent(emptyConsent);
     setSuccess(null);
   };
 
