@@ -137,7 +137,7 @@ export function Booking() {
             service: booking.service,
             booking_date: booking.booking_date,
             booking_time: booking.booking_time,
-            waiver_accepted: waiver,
+            waiver_accepted: consent.waiver,
           },
         });
         setSuccess({ membershipNumber: res.membershipNumber, isNew: false });
@@ -150,7 +150,7 @@ export function Booking() {
               service: booking.service,
               booking_date: booking.booking_date,
               booking_time: booking.booking_time,
-              waiver_accepted: waiver,
+              waiver_accepted: consent.waiver,
             },
           },
         });
