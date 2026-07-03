@@ -43,7 +43,7 @@ const bookingDetailsSchema = z.object({
 export const registerMember = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => registrationSchema.parse(data))
   .handler(async ({ data }) => {
-    const { data: mnum, error } = await db().rpc("app_register_member", {
+    const { data: mnum, error } = await (await db()).rpc("app_register_member", {
       p_parent: data.parent,
       p_child: data.child,
     });
@@ -66,7 +66,7 @@ export const lookupMember = createServerFn({ method: "POST" })
     z.object({ membership_number: z.string().trim().min(1).max(20) }).parse(data),
   )
   .handler(async ({ data }) => {
-    const { data: res, error } = await db().rpc("app_lookup_member", {
+    const { data: res, error } = await (await db()).rpc("app_lookup_member", {
       p_mnum: data.membership_number,
     });
     if (error) throw new Error(error.message);
@@ -79,7 +79,7 @@ export const createBooking = createServerFn({ method: "POST" })
     bookingDetailsSchema.extend({ membership_number: z.string().trim().min(1).max(20) }).parse(data),
   )
   .handler(async ({ data }) => {
-    const { data: mnum, error } = await db().rpc("app_create_booking", {
+    const { data: mnum, error } = await (await db()).rpc("app_create_booking", {
       p_mnum: data.membership_number,
       p_service: data.service,
       p_date: data.booking_date ?? "",
@@ -97,7 +97,7 @@ export const registerAndBook = createServerFn({ method: "POST" })
     registrationSchema.extend({ booking: bookingDetailsSchema }).parse(data),
   )
   .handler(async ({ data }) => {
-    const { data: mnum, error } = await db().rpc("app_register_and_book", {
+    const { data: mnum, error } = await (await db()).rpc("app_register_and_book", {
       p_parent: data.parent,
       p_child: data.child,
       p_service: data.booking.service,
@@ -165,7 +165,7 @@ export type AdminBooking = {
 export const adminGetOverview = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => z.object({ password: z.string() }).parse(data))
   .handler(async ({ data }) => {
-    const { data: res, error } = await db().rpc("app_admin_overview", { p_password: data.password });
+    const { data: res, error } = await (await db()).rpc("app_admin_overview", { p_password: data.password });
     if (error) throw new Error(error.message);
     return res as unknown as AdminOverview;
   });
@@ -173,7 +173,7 @@ export const adminGetOverview = createServerFn({ method: "POST" })
 export const adminListMembers = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => z.object({ password: z.string() }).parse(data))
   .handler(async ({ data }) => {
-    const { data: res, error } = await db().rpc("app_admin_members", { p_password: data.password });
+    const { data: res, error } = await (await db()).rpc("app_admin_members", { p_password: data.password });
     if (error) throw new Error(error.message);
     return res as unknown as AdminMember[];
   });
@@ -181,7 +181,7 @@ export const adminListMembers = createServerFn({ method: "POST" })
 export const adminListBookings = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => z.object({ password: z.string() }).parse(data))
   .handler(async ({ data }) => {
-    const { data: res, error } = await db().rpc("app_admin_bookings", { p_password: data.password });
+    const { data: res, error } = await (await db()).rpc("app_admin_bookings", { p_password: data.password });
     if (error) throw new Error(error.message);
     return res as unknown as AdminBooking[];
   });
@@ -197,7 +197,7 @@ export const adminUpdateBookingStatus = createServerFn({ method: "POST" })
       .parse(data),
   )
   .handler(async ({ data }) => {
-    const { error } = await db().rpc("app_admin_update_booking", {
+    const { error } = await (await db()).rpc("app_admin_update_booking", {
       p_password: data.password,
       p_id: data.id,
       p_status: data.status,
