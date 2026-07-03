@@ -48,6 +48,7 @@ function RegisterPage() {
   const [child, setChild] = useState<ChildForm>(emptyChild);
   const [parent, setParent] = useState<ParentForm>(emptyParent);
   const [submitting, setSubmitting] = useState(false);
+  const [consent, setConsent] = useState<Consent>(emptyConsent);
   const [membershipNumber, setMembershipNumber] = useState<string | null>(null);
 
   const next = () => {
@@ -63,6 +64,8 @@ function RegisterPage() {
   };
 
   const submit = async () => {
+    const err = validateConsent(consent);
+    if (err) return toast.error(err);
     setSubmitting(true);
     try {
       const res = await register({ data: { child, parent } });
