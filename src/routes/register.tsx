@@ -112,7 +112,10 @@ function RegisterPage() {
               {step === 0 && <ChildFields value={child} onChange={setChild} />}
               {step === 1 && <ParentFields value={parent} onChange={setParent} />}
               {step === 2 && (
-                <Review child={child} parent={parent} />
+                <div className="grid gap-6">
+                  <Review child={child} parent={parent} />
+                  <ConsentCheckboxes value={consent} onChange={setConsent} />
+                </div>
               )}
 
               <div className="mt-8 flex items-center justify-between gap-4">
