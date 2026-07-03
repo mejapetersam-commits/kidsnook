@@ -135,5 +135,6 @@ export const serviceList = [
   "Kids Library / Reading Session",
   "Outdoor Activities",
   "Creative Corner",
+  "Nanny & Me Club",
   "Birthday Event",
 ];
