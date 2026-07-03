@@ -126,7 +126,8 @@ export function Booking() {
   };
 
   const submit = async () => {
-    if (!waiver) return toast.error("Please accept the indemnity waiver to continue.");
+    const cErr = validateConsent(consent);
+    if (cErr) return toast.error(cErr);
     setSubmitting(true);
     try {
       if (mode === "member") {
