@@ -21,19 +21,32 @@ function db() {
   );
 }
 
+const opt = (max: number) => z.string().trim().max(max).optional().or(z.literal(""));
+
 const parentSchema = z.object({
   name: z.string().trim().min(1).max(120),
   phone: z.string().trim().min(1).max(40),
-  email: z.string().trim().max(255).optional().or(z.literal("")),
-  emergency_contact: z.string().trim().max(120).optional().or(z.literal("")),
+  email: opt(255),
+  emergency_contact: opt(120),
+  relationship: opt(80),
+  home_address: opt(255),
+  emergency_contact_name: opt(120),
+  emergency_contact_relationship: opt(80),
+  emergency_contact_phone: opt(40),
+  emergency_contact_alt_phone: opt(40),
 });
 
 const childSchema = z.object({
   first_name: z.string().trim().min(1).max(80),
   last_name: z.string().trim().min(1).max(80),
-  dob: z.string().trim().max(20).optional().or(z.literal("")),
-  sex: z.string().trim().max(20).optional().or(z.literal("")),
-  allergies: z.string().trim().max(500).optional().or(z.literal("")),
+  dob: opt(20),
+  sex: opt(20),
+  allergies: opt(500),
+  medical_conditions: opt(1000),
+  doctor_name: opt(120),
+  doctor_phone: opt(40),
+  service_preferences: opt(200),
+  notes: opt(1000),
 });
 
 const registrationSchema = z.object({ parent: parentSchema, child: childSchema });
