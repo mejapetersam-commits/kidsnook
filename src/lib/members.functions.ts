@@ -3,9 +3,12 @@ import { z } from "zod";
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
 
-// NOTE: Access control lives in the database (SECURITY DEFINER functions).
-// The member/parent/booking tables are fully locked (RLS, no public policies);
-// only the vetted RPC functions below can touch them. Admin RPCs verify the
+// NOTE: Access control lives in the database. The privileged SECURITY DEFINER
+// logic now lives in the `internal` schema, which is NOT exposed via the Data
+// API. Only the thin SECURITY INVOKER wrappers in the `public` schema are
+// callable through the API, and they simply forward to the internal functions.
+// The member/parent/booking tables remain fully RLS-locked (no public policies);
+// only the vetted internal functions can touch them. Admin RPCs verify the
 // admin password inside the database.
 // ⚠️ TODO: The admin password is currently hardcoded in the database function
 // `_admin_password()`. Replace it with real admin authentication/roles later.
