@@ -287,18 +287,7 @@ export function Booking() {
                       <Row k="Date" v={booking.booking_date || "Flexible"} />
                       <Row k="Time" v={booking.booking_time || "Flexible"} />
                     </dl>
-                    <label className="flex items-start gap-3 rounded-2xl bg-muted p-4">
-                      <Checkbox
-                        checked={waiver}
-                        onCheckedChange={(v) => setWaiver(v === true)}
-                        className="mt-1"
-                      />
-                      <span className="text-sm font-medium text-foreground">
-                        I accept the indemnity waiver and confirm that KIDS' NOOK and its staff are
-                        not liable for any injury during supervised activities, and that the
-                        information provided is accurate.
-                      </span>
-                    </label>
+                    <ConsentCheckboxes value={consent} onChange={setConsent} />
                   </div>
                 )}
 
