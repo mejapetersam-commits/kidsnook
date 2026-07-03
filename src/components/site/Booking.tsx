@@ -3,7 +3,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
+
 import {
   Select,
   SelectContent,
@@ -27,6 +27,12 @@ import {
   type ParentForm,
 } from "@/components/site/member-fields";
 import { lookupMember, createBooking, registerAndBook } from "@/lib/members.functions";
+import {
+  ConsentCheckboxes,
+  emptyConsent,
+  validateConsent,
+  type Consent,
+} from "@/components/site/ConsentCheckboxes";
 
 type Mode = null | "member" | "new";
 type BookingDetails = { service: string; booking_date: string; booking_time: string };
@@ -57,7 +63,7 @@ export function Booking() {
 
   // shared
   const [booking, setBooking] = useState<BookingDetails>(emptyBooking);
-  const [waiver, setWaiver] = useState(false);
+  const [consent, setConsent] = useState<Consent>(emptyConsent);
 
   const memberSteps = ["Membership", "Service", "Confirm"];
   const newSteps = ["Child", "Parent", "Service", "Confirm"];
@@ -71,7 +77,7 @@ export function Booking() {
     setChild(emptyChild);
     setParent(emptyParent);
     setBooking(emptyBooking);
-    setWaiver(false);
+    setConsent(emptyConsent);
     setSuccess(null);
   };
 
@@ -120,7 +126,8 @@ export function Booking() {
   };
 
   const submit = async () => {
-    if (!waiver) return toast.error("Please accept the indemnity waiver to continue.");
+    const cErr = validateConsent(consent);
+    if (cErr) return toast.error(cErr);
     setSubmitting(true);
     try {
       if (mode === "member") {
@@ -130,7 +137,7 @@ export function Booking() {
             service: booking.service,
             booking_date: booking.booking_date,
             booking_time: booking.booking_time,
-            waiver_accepted: waiver,
+            waiver_accepted: consent.waiver,
           },
         });
         setSuccess({ membershipNumber: res.membershipNumber, isNew: false });
@@ -143,7 +150,7 @@ export function Booking() {
               service: booking.service,
               booking_date: booking.booking_date,
               booking_time: booking.booking_time,
-              waiver_accepted: waiver,
+              waiver_accepted: consent.waiver,
             },
           },
         });
@@ -280,18 +287,7 @@ export function Booking() {
                       <Row k="Date" v={booking.booking_date || "Flexible"} />
                       <Row k="Time" v={booking.booking_time || "Flexible"} />
                     </dl>
-                    <label className="flex items-start gap-3 rounded-2xl bg-muted p-4">
-                      <Checkbox
-                        checked={waiver}
-                        onCheckedChange={(v) => setWaiver(v === true)}
-                        className="mt-1"
-                      />
-                      <span className="text-sm font-medium text-foreground">
-                        I accept the indemnity waiver and confirm that KIDS' NOOK and its staff are
-                        not liable for any injury during supervised activities, and that the
-                        information provided is accurate.
-                      </span>
-                    </label>
+                    <ConsentCheckboxes value={consent} onChange={setConsent} />
                   </div>
                 )}
 

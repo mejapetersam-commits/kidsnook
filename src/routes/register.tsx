@@ -19,6 +19,12 @@ import {
   type ParentForm,
 } from "@/components/site/member-fields";
 import { registerMember } from "@/lib/members.functions";
+import {
+  ConsentCheckboxes,
+  emptyConsent,
+  validateConsent,
+  type Consent,
+} from "@/components/site/ConsentCheckboxes";
 
 export const Route = createFileRoute("/register")({
   head: () => ({
@@ -42,6 +48,7 @@ function RegisterPage() {
   const [child, setChild] = useState<ChildForm>(emptyChild);
   const [parent, setParent] = useState<ParentForm>(emptyParent);
   const [submitting, setSubmitting] = useState(false);
+  const [consent, setConsent] = useState<Consent>(emptyConsent);
   const [membershipNumber, setMembershipNumber] = useState<string | null>(null);
 
   const next = () => {
@@ -57,6 +64,8 @@ function RegisterPage() {
   };
 
   const submit = async () => {
+    const err = validateConsent(consent);
+    if (err) return toast.error(err);
     setSubmitting(true);
     try {
       const res = await register({ data: { child, parent } });
@@ -103,7 +112,10 @@ function RegisterPage() {
               {step === 0 && <ChildFields value={child} onChange={setChild} />}
               {step === 1 && <ParentFields value={parent} onChange={setParent} />}
               {step === 2 && (
-                <Review child={child} parent={parent} />
+                <div className="grid gap-6">
+                  <Review child={child} parent={parent} />
+                  <ConsentCheckboxes value={consent} onChange={setConsent} />
+                </div>
               )}
 
               <div className="mt-8 flex items-center justify-between gap-4">

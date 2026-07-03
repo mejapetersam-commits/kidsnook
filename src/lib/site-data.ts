@@ -68,6 +68,19 @@ export const services = [
     blurb: "Art and craft activities designed to inspire creativity.",
     items: ["Drawing", "Painting", "DIY Crafts", "Seasonal Projects"],
   },
+  {
+    icon: HeartHandshake,
+    emoji: "🧸",
+    title: "Nanny & Me Club",
+    color: "secondary" as const,
+    blurb: "A structured play experience for toddlers 1–3 to explore and grow with their nanny.",
+    items: [
+      "Tiny Trekkers Tuesday",
+      "Water Wednesday",
+      "Tiny Artists Thursday",
+      "Fitness Friday",
+    ],
+  },
 ];
 
 export const whyParents = [
@@ -122,5 +135,6 @@ export const serviceList = [
   "Kids Library / Reading Session",
   "Outdoor Activities",
   "Creative Corner",
+  "Nanny & Me Club",
   "Birthday Event",
 ];
