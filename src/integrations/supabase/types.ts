@@ -145,6 +145,7 @@ export type Database = {
     }
     Functions: {
       _admin_password: { Args: never; Returns: string }
+      _whoami: { Args: never; Returns: string }
       app_admin_bookings: { Args: { p_password: string }; Returns: Json }
       app_admin_members: { Args: { p_password: string }; Returns: Json }
       app_admin_overview: { Args: { p_password: string }; Returns: Json }
