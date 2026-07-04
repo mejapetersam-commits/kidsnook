@@ -60,7 +60,7 @@ export const createEnrollment = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => enrollmentSchema.parse(data))
   .handler(async ({ data }) => {
     const { error } = await db().rpc("app_create_enrollment", {
-      p_data: data as unknown as Record<string, unknown>,
+      p_data: data as unknown as Database["public"]["Functions"]["app_create_enrollment"]["Args"]["p_data"],
     });
     if (error) throw new Error(error.message);
     // 📱 TODO: Integrate SMS/email confirmation of the enrollment here.
