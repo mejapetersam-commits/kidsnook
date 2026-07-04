@@ -127,6 +127,93 @@ export type Database = {
           },
         ]
       }
+      enrollments: {
+        Row: {
+          allergies: string
+          child_dob: string
+          child_full_name: string
+          child_gender: string | null
+          child_nickname: string | null
+          consent: boolean
+          created_at: string
+          doctor_name: string | null
+          doctor_phone: string | null
+          dropoff_time: string | null
+          ec1_name: string
+          ec1_phone: string
+          ec1_relationship: string
+          ec2_name: string | null
+          ec2_phone: string | null
+          ec2_relationship: string | null
+          home_address: string
+          id: string
+          medical_conditions: string | null
+          medications: string | null
+          parent_email: string
+          parent_full_name: string
+          parent_phone: string
+          parent_relationship: string
+          preferred_start_date: string
+          services: Json
+        }
+        Insert: {
+          allergies: string
+          child_dob: string
+          child_full_name: string
+          child_gender?: string | null
+          child_nickname?: string | null
+          consent?: boolean
+          created_at?: string
+          doctor_name?: string | null
+          doctor_phone?: string | null
+          dropoff_time?: string | null
+          ec1_name: string
+          ec1_phone: string
+          ec1_relationship: string
+          ec2_name?: string | null
+          ec2_phone?: string | null
+          ec2_relationship?: string | null
+          home_address: string
+          id?: string
+          medical_conditions?: string | null
+          medications?: string | null
+          parent_email: string
+          parent_full_name: string
+          parent_phone: string
+          parent_relationship: string
+          preferred_start_date: string
+          services?: Json
+        }
+        Update: {
+          allergies?: string
+          child_dob?: string
+          child_full_name?: string
+          child_gender?: string | null
+          child_nickname?: string | null
+          consent?: boolean
+          created_at?: string
+          doctor_name?: string | null
+          doctor_phone?: string | null
+          dropoff_time?: string | null
+          ec1_name?: string
+          ec1_phone?: string
+          ec1_relationship?: string
+          ec2_name?: string | null
+          ec2_phone?: string | null
+          ec2_relationship?: string | null
+          home_address?: string
+          id?: string
+          medical_conditions?: string | null
+          medications?: string | null
+          parent_email?: string
+          parent_full_name?: string
+          parent_phone?: string
+          parent_relationship?: string
+          preferred_start_date?: string
+          services?: Json
+        }
+        Relationships: []
+      }
       parents: {
         Row: {
           created_at: string
@@ -172,6 +259,30 @@ export type Database = {
         }
         Relationships: []
       }
+      services: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          sort_order: number
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          sort_order?: number
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          sort_order?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -195,6 +306,7 @@ export type Database = {
         }
         Returns: string
       }
+      app_create_enrollment: { Args: { p_data: Json }; Returns: string }
       app_lookup_member: { Args: { p_mnum: string }; Returns: Json }
       app_register_and_book: {
         Args: {
