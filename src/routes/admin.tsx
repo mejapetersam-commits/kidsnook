@@ -42,6 +42,12 @@ type Overview = Awaited<ReturnType<typeof adminGetOverview>>;
 type Member = Awaited<ReturnType<typeof adminListMembers>>[number];
 type BookingRow = Awaited<ReturnType<typeof adminListBookings>>[number];
 
+function errMsg(e: unknown): string {
+  if (e instanceof Error) return e.message;
+  if (typeof e === "object" && e !== null && "message" in e) return String((e as { message: unknown }).message);
+  try { return JSON.stringify(e); } catch { return String(e); }
+}
+
 function AdminPage() {
   const getOverview = useServerFn(adminGetOverview);
   const listMembers = useServerFn(adminListMembers);
@@ -69,7 +75,7 @@ function AdminPage() {
       setBookings(bk as BookingRow[]);
       setAuthed(true);
     } catch (e: unknown) {
-      toast.error(e instanceof Error ? e.message : "Incorrect password.");
+      toast.error(errMsg(e));
     } finally {
       setLoading(false);
     }
@@ -81,7 +87,7 @@ function AdminPage() {
       setBookings((rows) => rows.map((r) => (r.id === id ? { ...r, status } : r)));
       toast.success(`Booking marked ${status}.`);
     } catch (e: unknown) {
-      toast.error(e instanceof Error ? e.message : "Failed to update status.");
+      toast.error(errMsg(e));
     }
   };
 
