@@ -5,12 +5,21 @@ import { z } from "zod";
 // These server functions run on the server, read the external client, and
 // return plain DTOs to the app. RLS on the external project applies (anon).
 
-// Generic read from any table in the external project's public schema.
+// The tables exposed by the external project's public schema.
+const externalTable = z.enum([
+  "bookings",
+  "children",
+  "enrollments",
+  "parents",
+  "services",
+]);
+
+// Generic read from a known table in the external project's public schema.
 export const externalSelect = createServerFn({ method: "GET" })
   .inputValidator((data: unknown) =>
     z
       .object({
-        table: z.string().trim().min(1).max(120),
+        table: externalTable,
         columns: z.string().trim().max(500).optional(),
         limit: z.number().int().min(1).max(1000).optional(),
       })
@@ -18,20 +27,17 @@ export const externalSelect = createServerFn({ method: "GET" })
   )
   .handler(async ({ data }) => {
     const { externalSupabase } = await import("@/lib/external-supabase.server");
-    const query = externalSupabase()
+    const { data: rows, error } = await externalSupabase()
       .from(data.table)
       .select(data.columns ?? "*")
       .limit(data.limit ?? 100);
-    const { data: rows, error } = await query;
     if (error) throw new Error(error.message);
     return { rows: rows ?? [] };
   });
 
 // Connectivity check: confirms a given table is reachable and returns its count.
 export const externalTableCheck = createServerFn({ method: "GET" })
-  .inputValidator((data: unknown) =>
-    z.object({ table: z.string().trim().min(1).max(120) }).parse(data),
-  )
+  .inputValidator((data: unknown) => z.object({ table: externalTable }).parse(data))
   .handler(async ({ data }) => {
     const { externalSupabase } = await import("@/lib/external-supabase.server");
     const { count, error } = await externalSupabase()
