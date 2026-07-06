@@ -65,11 +65,11 @@ function AdminPage() {
         listBookings({ data: { password: pw } }),
       ]);
       setOverview(ov);
-      setMembers(mem);
-      setBookings(bk);
+      setMembers(mem as Member[]);
+      setBookings(bk as BookingRow[]);
       setAuthed(true);
-    } catch {
-      toast.error("Incorrect password.");
+    } catch (e: unknown) {
+      toast.error(e instanceof Error ? e.message : "Incorrect password.");
     } finally {
       setLoading(false);
     }
@@ -80,8 +80,8 @@ function AdminPage() {
       await updateStatus({ data: { password, id, status } });
       setBookings((rows) => rows.map((r) => (r.id === id ? { ...r, status } : r)));
       toast.success(`Booking marked ${status}.`);
-    } catch {
-      toast.error("Failed to update status.");
+    } catch (e: unknown) {
+      toast.error(e instanceof Error ? e.message : "Failed to update status.");
     }
   };
 
@@ -130,7 +130,6 @@ function AdminPage() {
       <div className="mx-auto max-w-6xl px-5 py-10">
         <h1 className="font-display text-3xl font-extrabold text-foreground">Admin Dashboard</h1>
 
-        {/* Stats */}
         <div className="mt-6 grid gap-4 sm:grid-cols-2">
           <StatCard
             icon={<Users className="h-6 w-6" />}
@@ -223,15 +222,7 @@ function fmt(d: string) {
   return new Date(d).toLocaleDateString();
 }
 
-function StatCard({
-  icon,
-  label,
-  value,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  value: number;
-}) {
+function StatCard({ icon, label, value }: { icon: React.ReactNode; label: string; value: number }) {
   return (
     <div className="flex items-center gap-4 rounded-2xl bg-card p-6 shadow-card">
       <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
@@ -267,10 +258,7 @@ function useSort<T>(rows: T[], initial: keyof T) {
   const [dir, setDir] = useState<SortDir>("desc");
   const toggle = (k: keyof T) => {
     if (k === key) setDir((d) => (d === "asc" ? "desc" : "asc"));
-    else {
-      setKey(k);
-      setDir("asc");
-    }
+    else { setKey(k); setDir("asc"); }
   };
   const sorted = [...rows].sort((a, b) => {
     const av = a[key];
@@ -284,21 +272,10 @@ function useSort<T>(rows: T[], initial: keyof T) {
   return { sorted, toggle, key, dir };
 }
 
-function SortHead<T>({
-  label,
-  field,
-  toggle,
-}: {
-  label: string;
-  field: keyof T;
-  toggle: (k: keyof T) => void;
-}) {
+function SortHead<T>({ label, field, toggle }: { label: string; field: keyof T; toggle: (k: keyof T) => void }) {
   return (
     <TableHead>
-      <button
-        onClick={() => toggle(field)}
-        className="inline-flex items-center gap-1 font-bold hover:text-foreground"
-      >
+      <button onClick={() => toggle(field)} className="inline-flex items-center gap-1 font-bold hover:text-foreground">
         {label}
         <ArrowUpDown className="h-3 w-3" />
       </button>
@@ -309,28 +286,14 @@ function SortHead<T>({
 function MembersTable({ members }: { members: Member[] }) {
   const [q, setQ] = useState("");
   const filtered = members.filter((m) =>
-    [
-      m.membership_number,
-      m.first_name,
-      m.last_name,
-      m.parent_name,
-      m.parent_phone,
-      m.parent_email,
-    ]
-      .join(" ")
-      .toLowerCase()
-      .includes(q.toLowerCase()),
+    [m.membership_number, m.first_name, m.last_name, m.parent_name, m.parent_phone, m.parent_email]
+      .join(" ").toLowerCase().includes(q.toLowerCase()),
   );
   const { sorted, toggle } = useSort(filtered, "created_at");
 
   return (
     <div className="rounded-2xl bg-card p-6 shadow-card">
-      <Input
-        value={q}
-        onChange={(e) => setQ(e.target.value)}
-        placeholder="Search members…"
-        className="mb-4 max-w-sm"
-      />
+      <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search members…" className="mb-4 max-w-sm" />
       <div className="overflow-x-auto">
         <Table>
           <TableHeader>
@@ -364,9 +327,7 @@ function MembersTable({ members }: { members: Member[] }) {
             ))}
             {sorted.length === 0 && (
               <TableRow>
-                <TableCell colSpan={10} className="text-center text-muted-foreground">
-                  No members found.
-                </TableCell>
+                <TableCell colSpan={10} className="text-center text-muted-foreground">No members found.</TableCell>
               </TableRow>
             )}
           </TableBody>
@@ -376,30 +337,17 @@ function MembersTable({ members }: { members: Member[] }) {
   );
 }
 
-function BookingsTable({
-  bookings,
-  onStatus,
-}: {
-  bookings: BookingRow[];
-  onStatus: (id: string, status: "Pending" | "Confirmed" | "Cancelled") => void;
-}) {
+function BookingsTable({ bookings, onStatus }: { bookings: BookingRow[]; onStatus: (id: string, status: "Pending" | "Confirmed" | "Cancelled") => void }) {
   const [q, setQ] = useState("");
   const filtered = bookings.filter((b) =>
     [b.membership_number, b.child_name, b.parent_name, b.service, b.status]
-      .join(" ")
-      .toLowerCase()
-      .includes(q.toLowerCase()),
+      .join(" ").toLowerCase().includes(q.toLowerCase()),
   );
   const { sorted, toggle } = useSort(filtered, "created_at");
 
   return (
     <div className="rounded-2xl bg-card p-6 shadow-card">
-      <Input
-        value={q}
-        onChange={(e) => setQ(e.target.value)}
-        placeholder="Search bookings…"
-        className="mb-4 max-w-sm"
-      />
+      <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search bookings…" className="mb-4 max-w-sm" />
       <div className="overflow-x-auto">
         <Table>
           <TableHeader>
@@ -423,19 +371,10 @@ function BookingsTable({
                 <TableCell>{b.service}</TableCell>
                 <TableCell>{b.booking_date || "—"}</TableCell>
                 <TableCell>{b.booking_time || "—"}</TableCell>
+                <TableCell><StatusBadge status={b.status} /></TableCell>
                 <TableCell>
-                  <StatusBadge status={b.status} />
-                </TableCell>
-                <TableCell>
-                  <Select
-                    value={b.status}
-                    onValueChange={(v) =>
-                      onStatus(b.id, v as "Pending" | "Confirmed" | "Cancelled")
-                    }
-                  >
-                    <SelectTrigger className="h-8 w-36">
-                      <SelectValue />
-                    </SelectTrigger>
+                  <Select value={b.status} onValueChange={(v) => onStatus(b.id, v as "Pending" | "Confirmed" | "Cancelled")}>
+                    <SelectTrigger className="h-8 w-36"><SelectValue /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="Pending">Pending</SelectItem>
                       <SelectItem value="Confirmed">Confirmed</SelectItem>
@@ -447,9 +386,7 @@ function BookingsTable({
             ))}
             {sorted.length === 0 && (
               <TableRow>
-                <TableCell colSpan={8} className="text-center text-muted-foreground">
-                  No bookings found.
-                </TableCell>
+                <TableCell colSpan={8} className="text-center text-muted-foreground">No bookings found.</TableCell>
               </TableRow>
             )}
           </TableBody>
