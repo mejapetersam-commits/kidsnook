@@ -12,10 +12,11 @@
 // The .server.ts suffix keeps this out of the client bundle. Read env inside
 // the factory so values resolve per-request on the Worker runtime.
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import type { Database } from "@/integrations/external-supabase/types";
 
-let _client: SupabaseClient | undefined;
+let _client: SupabaseClient<Database> | undefined;
 
-export function externalSupabase(): SupabaseClient {
+export function externalSupabase(): SupabaseClient<Database> {
   if (_client) return _client;
 
   const url = process.env.EXTERNAL_SUPABASE_URL;
