@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -483,23 +483,24 @@ export function Booking() {
                 {step === 4 && (
                   <div className="grid gap-6">
                     <h3 className="font-display text-xl font-extrabold text-foreground">Service Preference & Consent</h3>
-                    <Field id="svc" label="Select Services" required>
-                      <div className="grid gap-3">
-                        {SERVICES.map((s) => (
-                          <label key={s.id} className="flex cursor-pointer items-start gap-3 rounded-2xl border border-border p-4 hover:bg-muted">
-                            <Checkbox
-                              checked={enForm.services.includes(s.name)}
-                              onCheckedChange={() => toggleService(s.name)}
-                              className="mt-0.5"
-                            />
-                            <div>
-                              <p className="font-bold text-foreground">{s.name}</p>
-                              <p className="text-sm text-muted-foreground">{s.description}</p>
-                            </div>
-                          </label>
-                        ))}
-                      </div>
-                    </Field>
+                    <div className="grid gap-3">
+                      <Label className="font-bold text-foreground">
+                        Select Services <span className="ml-1 text-destructive">*</span>
+                      </Label>
+                      {SERVICES.map((s) => (
+                        <label key={s.id} className="flex cursor-pointer items-start gap-3 rounded-2xl border border-border p-4 hover:bg-muted">
+                          <Checkbox
+                            checked={enForm.services.includes(s.name)}
+                            onCheckedChange={() => toggleService(s.name)}
+                            className="mt-0.5"
+                          />
+                          <div>
+                            <p className="font-bold text-foreground">{s.name}</p>
+                            <p className="text-sm text-muted-foreground">{s.description}</p>
+                          </div>
+                        </label>
+                      ))}
+                    </div>
                     <div className="grid gap-5 sm:grid-cols-2">
                       <Field id="psd" label="Preferred Start Date" required>
                         <Input id="psd" type="date" value={enForm.preferred_start_date} onChange={(e) => set("preferred_start_date", e.target.value)} />
