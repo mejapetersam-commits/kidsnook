@@ -1,24 +1,17 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { createClient } from "@supabase/supabase-js";
-import type { Database } from "@/integrations/supabase/types";
 
-// Public data access uses the publishable-key client. The `services` table has
-// a public read policy; the `enrollments` table is RLS-locked and is only
-// written via the SECURITY DEFINER `app_create_enrollment` wrapper.
-function db() {
-  return createClient<Database>(
-    process.env.SUPABASE_URL!,
-    process.env.SUPABASE_PUBLISHABLE_KEY!,
-    { auth: { storage: undefined, persistSession: false, autoRefreshToken: false } },
-  );
-}
+// All application data now lives in the EXTERNAL Supabase project (source of
+// truth). Public reads (services) go through the anon client; writes to the
+// RLS-locked `enrollments` table go through the server-only service-role
+// client. The managed Lovable Cloud database is no longer used for app data.
 
 export type Service = { id: string; name: string; description: string | null };
 
-// ---------- Services (dynamic, kept in sync via the DB) ----------
+// ---------- Services (read from the external `services` table) ----------
 export const listServices = createServerFn({ method: "GET" }).handler(async () => {
-  const { data, error } = await db()
+  const { externalSupabase } = await import("@/lib/external-supabase.server");
+  const { data, error } = await externalSupabase()
     .from("services")
     .select("id, name, description")
     .order("sort_order", { ascending: true });
@@ -56,12 +49,41 @@ const enrollmentSchema = z.object({
   consent: z.literal(true),
 });
 
+const nn = (v?: string) => (v && v.trim() ? v.trim() : null);
+
 export const createEnrollment = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => enrollmentSchema.parse(data))
   .handler(async ({ data }) => {
-    const { error } = await db().rpc("app_create_enrollment", {
-      p_data: data as unknown as Database["public"]["Functions"]["app_create_enrollment"]["Args"]["p_data"],
-    });
+    const { externalSupabaseAdmin } = await import("@/lib/external-supabase.server");
+    const { error } = await externalSupabaseAdmin()
+      .from("enrollments")
+      .insert({
+        id: crypto.randomUUID(),
+        child_full_name: data.child_full_name,
+        child_dob: data.child_dob,
+        child_gender: nn(data.child_gender),
+        child_nickname: nn(data.child_nickname),
+        parent_full_name: data.parent_full_name,
+        parent_relationship: data.parent_relationship,
+        parent_phone: data.parent_phone,
+        parent_email: data.parent_email,
+        home_address: data.home_address,
+        ec1_name: data.ec1_name,
+        ec1_relationship: data.ec1_relationship,
+        ec1_phone: data.ec1_phone,
+        ec2_name: nn(data.ec2_name),
+        ec2_relationship: nn(data.ec2_relationship),
+        ec2_phone: nn(data.ec2_phone),
+        allergies: data.allergies,
+        medications: nn(data.medications),
+        medical_conditions: nn(data.medical_conditions),
+        doctor_name: nn(data.doctor_name),
+        doctor_phone: nn(data.doctor_phone),
+        services: data.services,
+        preferred_start_date: data.preferred_start_date,
+        dropoff_time: nn(data.dropoff_time),
+        consent: data.consent,
+      });
     if (error) throw new Error(error.message);
     // 📱 TODO: Integrate SMS/email confirmation of the enrollment here.
     return { ok: true as const };
