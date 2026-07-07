@@ -37,3 +37,33 @@ export function externalSupabase(): SupabaseClient<Database> {
   });
   return _client;
 }
+
+let _admin: SupabaseClient<Database> | undefined;
+
+// Service-role client for the EXTERNAL project. Used server-side ONLY for
+// privileged app data operations (writes and reads on RLS-locked tables:
+// parents, children, bookings, enrollments). This is the external equivalent
+// of the previous SECURITY DEFINER wrappers: the tables stay RLS-locked to
+// anon/public, and only these vetted server functions can touch them. Never
+// import this into client code — the .server.ts suffix keeps it server-only.
+export function externalSupabaseAdmin(): SupabaseClient<Database> {
+  if (_admin) return _admin;
+
+  const url = process.env.EXTERNAL_SUPABASE_URL;
+  const serviceKey = process.env.EXTERNAL_SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!url || !serviceKey) {
+    const missing = [
+      ...(!url ? ["EXTERNAL_SUPABASE_URL"] : []),
+      ...(!serviceKey ? ["EXTERNAL_SUPABASE_SERVICE_ROLE_KEY"] : []),
+    ];
+    throw new Error(
+      `Missing external Supabase secret(s): ${missing.join(", ")}. Add them via Lovable secrets.`,
+    );
+  }
+
+  _admin = createClient(url, serviceKey, {
+    auth: { storage: undefined, persistSession: false, autoRefreshToken: false },
+  });
+  return _admin;
+}
