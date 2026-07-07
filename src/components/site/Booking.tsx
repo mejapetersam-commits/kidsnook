@@ -17,7 +17,7 @@ import { UserCheck, Sparkles } from "lucide-react";
 import { Stepper } from "@/components/site/Stepper";
 import { MembershipSuccess } from "@/components/site/MembershipSuccess";
 import { lookupMember, createBooking } from "@/lib/members.functions";
-import { createEnrollment, listServices, type Service } from "@/lib/enrollments.functions";
+import { createEnrollment } from "@/lib/enrollments.functions";
 import {
   ConsentCheckboxes,
   emptyConsent,
@@ -29,6 +29,17 @@ import { serviceList } from "@/lib/site-data";
 type Mode = null | "member" | "new";
 type BookingDetails = { service: string; booking_date: string; booking_time: string };
 const emptyBooking: BookingDetails = { service: "", booking_date: "", booking_time: "" };
+
+type Service = { id: string; name: string; description: string };
+
+const SERVICES: Service[] = [
+  { id: "1", name: "Hair & Beauty", description: "Expert styling including braiding, cornrows, haircuts and natural hair care" },
+  { id: "2", name: "Gaming Lounge", description: "Modern gaming stations for supervised entertainment" },
+  { id: "3", name: "Kids Library", description: "Cozy reading corner with story books and educational books" },
+  { id: "4", name: "Outdoor Activities", description: "Safe outdoor play, group activities and weekend events" },
+  { id: "5", name: "Creative Corner", description: "Art and craft activities including drawing, painting and DIY crafts" },
+  { id: "6", name: "Nanny & Me Club", description: "Structured play for toddlers aged 1-3 with their nanny" },
+];
 
 type EnrollForm = {
   child_full_name: string;
@@ -101,14 +112,12 @@ export function Booking() {
   const lookup = useServerFn(lookupMember);
   const book = useServerFn(createBooking);
   const enroll = useServerFn(createEnrollment);
-  const fetchServices = useServerFn(listServices);
 
   const [mode, setMode] = useState<Mode>(null);
   const [step, setStep] = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState<{ membershipNumber: string; isNew: boolean; childName?: string } | null>(null);
 
-  // member path
   const [membershipInput, setMembershipInput] = useState("");
   const [lookedUp, setLookedUp] = useState<{
     child: { first_name: string; last_name: string; membership_number: string };
@@ -117,11 +126,7 @@ export function Booking() {
   const [lookingUp, setLookingUp] = useState(false);
   const [booking, setBooking] = useState<BookingDetails>(emptyBooking);
   const [consent, setConsent] = useState<Consent>(emptyConsent);
-
-  // new client enrollment path
   const [enForm, setEnForm] = useState<EnrollForm>(emptyEnroll);
-  const [services, setServices] = useState<Service[]>([]);
-  const [servicesLoading, setServicesLoading] = useState(false);
 
   const memberSteps = ["Membership", "Service", "Confirm"];
 
@@ -135,16 +140,6 @@ export function Booking() {
     setEnForm(emptyEnroll);
     setSuccess(null);
   };
-
-  useEffect(() => {
-    if (mode === "new" && services.length === 0) {
-      setServicesLoading(true);
-      fetchServices().then((data) => {
-        setServices(data);
-        setServicesLoading(false);
-      }).catch(() => setServicesLoading(false));
-    }
-  }, [mode]);
 
   const set = (k: keyof EnrollForm, v: string | string[] | boolean) =>
     setEnForm((f) => ({ ...f, [k]: v }));
@@ -177,7 +172,7 @@ export function Booking() {
       if (!f.ec1_phone.trim()) return "Emergency contact phone is required.";
     }
     if (s === 3) {
-      if (!f.allergies.trim()) return "Please enter allergies or write 'None'.";
+      if (!f.allergies.trim()) return "Please enter allergies or write None.";
     }
     if (s === 4) {
       if (f.services.length === 0) return "Please select at least one service.";
@@ -378,7 +373,6 @@ export function Booking() {
               <Stepper steps={ENROLL_STEPS} current={step} />
               <div className="mt-8 rounded-3xl bg-card p-7 shadow-card sm:p-9">
 
-                {/* STEP 1 — Child Info */}
                 {step === 0 && (
                   <div className="grid gap-5">
                     <h3 className="font-display text-xl font-extrabold text-foreground">Child&#39;s Information</h3>
@@ -406,7 +400,6 @@ export function Booking() {
                   </div>
                 )}
 
-                {/* STEP 2 — Parent / Guardian */}
                 {step === 1 && (
                   <div className="grid gap-5">
                     <h3 className="font-display text-xl font-extrabold text-foreground">Parent / Guardian</h3>
@@ -430,7 +423,6 @@ export function Booking() {
                   </div>
                 )}
 
-                {/* STEP 3 — Emergency Contacts */}
                 {step === 2 && (
                   <div className="grid gap-6">
                     <h3 className="font-display text-xl font-extrabold text-foreground">Emergency Contacts</h3>
@@ -465,7 +457,6 @@ export function Booking() {
                   </div>
                 )}
 
-                {/* STEP 4 — Medical Info */}
                 {step === 3 && (
                   <div className="grid gap-5">
                     <h3 className="font-display text-xl font-extrabold text-foreground">Medical Info & Allergies</h3>
@@ -489,30 +480,25 @@ export function Booking() {
                   </div>
                 )}
 
-                {/* STEP 5 — Services & Consent */}
                 {step === 4 && (
                   <div className="grid gap-6">
                     <h3 className="font-display text-xl font-extrabold text-foreground">Service Preference & Consent</h3>
                     <Field id="svc" label="Select Services" required>
-                      {servicesLoading ? (
-                        <p className="text-sm text-muted-foreground">Loading services…</p>
-                      ) : (
-                        <div className="grid gap-3">
-                          {services.map((s) => (
-                            <label key={s.id} className="flex cursor-pointer items-start gap-3 rounded-2xl border border-border p-4 hover:bg-muted">
-                              <Checkbox
-                                checked={enForm.services.includes(s.name)}
-                                onCheckedChange={() => toggleService(s.name)}
-                                className="mt-0.5"
-                              />
-                              <div>
-                                <p className="font-bold text-foreground">{s.name}</p>
-                                {s.description && <p className="text-sm text-muted-foreground">{s.description}</p>}
-                              </div>
-                            </label>
-                          ))}
-                        </div>
-                      )}
+                      <div className="grid gap-3">
+                        {SERVICES.map((s) => (
+                          <label key={s.id} className="flex cursor-pointer items-start gap-3 rounded-2xl border border-border p-4 hover:bg-muted">
+                            <Checkbox
+                              checked={enForm.services.includes(s.name)}
+                              onCheckedChange={() => toggleService(s.name)}
+                              className="mt-0.5"
+                            />
+                            <div>
+                              <p className="font-bold text-foreground">{s.name}</p>
+                              <p className="text-sm text-muted-foreground">{s.description}</p>
+                            </div>
+                          </label>
+                        ))}
+                      </div>
                     </Field>
                     <div className="grid gap-5 sm:grid-cols-2">
                       <Field id="psd" label="Preferred Start Date" required>
