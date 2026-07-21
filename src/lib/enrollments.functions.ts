@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { assertAdmin } from "@/lib/admin-auth.server";
 
 // All application data now lives in the EXTERNAL Supabase project (source of
 // truth). Public reads (services) go through the anon client; writes to the
@@ -50,6 +51,51 @@ const enrollmentSchema = z.object({
 });
 
 const nn = (v?: string) => (v && v.trim() ? v.trim() : null);
+
+// ---------- Admin: read enrollments ----------
+export type AdminEnrollment = {
+  id: string;
+  child_full_name: string;
+  child_dob: string;
+  child_gender: string | null;
+  child_nickname: string | null;
+  parent_full_name: string;
+  parent_relationship: string;
+  parent_phone: string;
+  parent_email: string;
+  home_address: string;
+  ec1_name: string;
+  ec1_relationship: string;
+  ec1_phone: string;
+  ec2_name: string | null;
+  ec2_relationship: string | null;
+  ec2_phone: string | null;
+  allergies: string;
+  medications: string | null;
+  medical_conditions: string | null;
+  doctor_name: string | null;
+  doctor_phone: string | null;
+  services: string[];
+  preferred_start_date: string;
+  dropoff_time: string | null;
+  consent: boolean;
+  created_at: string;
+};
+
+export const adminListEnrollments = createServerFn({ method: "POST" })
+  .inputValidator((data: unknown) => z.object({ password: z.string() }).parse(data))
+  .handler(async ({ data }): Promise<AdminEnrollment[]> => {
+    assertAdmin(data.password);
+    const { externalSupabaseAdmin } = await import("@/lib/external-supabase.server");
+    const { data: rows, error } = await externalSupabaseAdmin()
+      .from("enrollments")
+      .select(
+        "id, child_full_name, child_dob, child_gender, child_nickname, parent_full_name, parent_relationship, parent_phone, parent_email, home_address, ec1_name, ec1_relationship, ec1_phone, ec2_name, ec2_relationship, ec2_phone, allergies, medications, medical_conditions, doctor_name, doctor_phone, services, preferred_start_date, dropoff_time, consent, created_at",
+      )
+      .order("created_at", { ascending: false });
+    if (error) throw new Error(error.message);
+    return (rows ?? []) as AdminEnrollment[];
+  });
 
 export const createEnrollment = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => enrollmentSchema.parse(data))

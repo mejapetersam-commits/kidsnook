@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { assertAdmin } from "@/lib/admin-auth.server";
 
 // All member/parent/booking data now lives in the EXTERNAL Supabase project
 // (source of truth). These tables are RLS-locked (no anon policies) exactly as
@@ -7,10 +8,8 @@ import { z } from "zod";
 // client. This preserves the previous security posture: the public can never
 // touch these tables directly through the Data API — only these vetted server
 // functions can, and admin RPCs verify the admin password in app code.
-// ⚠️ TODO: The admin password is currently a hardcoded constant. Replace it
-// with real admin authentication/roles later.
-
-const ADMIN_PASSWORD = "kidsnook2024";
+// ⚠️ TODO: The admin password is currently a hardcoded constant (see
+// admin-auth.server.ts). Replace it with real admin authentication/roles later.
 
 const opt = (max: number) => z.string().trim().max(max).optional().or(z.literal(""));
 const nn = (v?: string) => (v && v.trim() ? v.trim() : null);
@@ -71,9 +70,7 @@ function composeEmergencyContact(p: ParentInput): string | null {
 async function nextMembershipNumber(
   admin: import("@supabase/supabase-js").SupabaseClient,
 ): Promise<string> {
-  const { count, error } = await admin
-    .from("children")
-    .select("*", { count: "exact", head: true });
+  const { count, error } = await admin.from("children").select("*", { count: "exact", head: true });
   if (error) throw new Error(error.message);
   const n = (count ?? 0) + 1;
   return `KN-${String(n).padStart(6, "0")}`;
@@ -166,7 +163,9 @@ export const lookupMember = createServerFn({ method: "POST" })
 // ---------- Existing member booking ----------
 export const createBooking = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) =>
-    bookingDetailsSchema.extend({ membership_number: z.string().trim().min(1).max(20) }).parse(data),
+    bookingDetailsSchema
+      .extend({ membership_number: z.string().trim().min(1).max(20) })
+      .parse(data),
   )
   .handler(async ({ data }) => {
     const { externalSupabaseAdmin } = await import("@/lib/external-supabase.server");
@@ -280,15 +279,14 @@ export type AdminBooking = {
   created_at: string;
 };
 
-function assertAdmin(password: string) {
-  if (password !== ADMIN_PASSWORD) throw new Error("Incorrect admin password.");
-}
-
 async function loadParentsByChild(
   admin: import("@supabase/supabase-js").SupabaseClient,
   childIds: string[],
 ) {
-  const map = new Map<string, { name: string; phone: string; email: string; emergency_contact: string }>();
+  const map = new Map<
+    string,
+    { name: string; phone: string; email: string; emergency_contact: string }
+  >();
   if (!childIds.length) return map;
   const { data } = await admin
     .from("parents")
@@ -326,7 +324,10 @@ export const adminGetOverview = createServerFn({ method: "POST" })
       .limit(10);
     if (childErr) throw new Error(childErr.message);
 
-    const parents = await loadParentsByChild(admin, (children ?? []).map((c) => c.id));
+    const parents = await loadParentsByChild(
+      admin,
+      (children ?? []).map((c) => c.id),
+    );
 
     const { data: bookings, error: bkErr } = await admin
       .from("bookings")
@@ -374,7 +375,10 @@ export const adminListMembers = createServerFn({ method: "POST" })
       .order("created_at", { ascending: false });
     if (error) throw new Error(error.message);
 
-    const parents = await loadParentsByChild(admin, (children ?? []).map((c) => c.id));
+    const parents = await loadParentsByChild(
+      admin,
+      (children ?? []).map((c) => c.id),
+    );
 
     return (children ?? []).map((c) => {
       const p = parents.get(c.id);
