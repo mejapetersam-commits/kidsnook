@@ -127,7 +127,8 @@ export function Booking() {
   } = useQuery({
     queryKey: ["services"],
     queryFn: () => fetchServices(),
-    staleTime: 5 * 60 * 1000,
+    staleTime: 0,
+    refetchOnMount: "always",
   });
 
   const [mode, setMode] = useState<Mode>(null);
