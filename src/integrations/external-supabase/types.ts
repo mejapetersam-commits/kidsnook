@@ -81,6 +81,7 @@ export type Database = {
       enrollments: {
         Row: {
           id: string;
+          membership_number: string;
           child_full_name: string;
           child_dob: string;
           child_gender: string | null;
@@ -109,6 +110,7 @@ export type Database = {
         };
         Insert: {
           id: string;
+          membership_number?: string;
           child_full_name: string;
           child_dob: string;
           child_gender?: string | null;
@@ -137,6 +139,7 @@ export type Database = {
         };
         Update: {
           id?: string | null;
+          membership_number?: string | null;
           child_full_name?: string | null;
           child_dob?: string | null;
           child_gender?: string | null;

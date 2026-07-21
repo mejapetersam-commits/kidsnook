@@ -55,6 +55,7 @@ const nn = (v?: string) => (v && v.trim() ? v.trim() : null);
 // ---------- Admin: read enrollments ----------
 export type AdminEnrollment = {
   id: string;
+  membership_number: string;
   child_full_name: string;
   child_dob: string;
   child_gender: string | null;
@@ -90,7 +91,7 @@ export const adminListEnrollments = createServerFn({ method: "POST" })
     const { data: rows, error } = await externalSupabaseAdmin()
       .from("enrollments")
       .select(
-        "id, child_full_name, child_dob, child_gender, child_nickname, parent_full_name, parent_relationship, parent_phone, parent_email, home_address, ec1_name, ec1_relationship, ec1_phone, ec2_name, ec2_relationship, ec2_phone, allergies, medications, medical_conditions, doctor_name, doctor_phone, services, preferred_start_date, dropoff_time, consent, created_at",
+        "id, membership_number, child_full_name, child_dob, child_gender, child_nickname, parent_full_name, parent_relationship, parent_phone, parent_email, home_address, ec1_name, ec1_relationship, ec1_phone, ec2_name, ec2_relationship, ec2_phone, allergies, medications, medical_conditions, doctor_name, doctor_phone, services, preferred_start_date, dropoff_time, consent, created_at",
       )
       .order("created_at", { ascending: false });
     if (error) throw new Error(error.message);
@@ -101,7 +102,7 @@ export const createEnrollment = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => enrollmentSchema.parse(data))
   .handler(async ({ data }) => {
     const { externalSupabaseAdmin } = await import("@/lib/external-supabase.server");
-    const { error } = await externalSupabaseAdmin()
+    const { data: row, error } = await externalSupabaseAdmin()
       .from("enrollments")
       .insert({
         id: crypto.randomUUID(),
@@ -129,8 +130,10 @@ export const createEnrollment = createServerFn({ method: "POST" })
         preferred_start_date: data.preferred_start_date,
         dropoff_time: nn(data.dropoff_time),
         consent: data.consent,
-      });
+      })
+      .select("membership_number")
+      .single();
     if (error) throw new Error(error.message);
     // 📱 TODO: Integrate SMS/email confirmation of the enrollment here.
-    return { ok: true as const };
+    return { ok: true as const, membershipNumber: row.membership_number as string };
   });

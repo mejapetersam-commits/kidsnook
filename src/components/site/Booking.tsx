@@ -260,14 +260,14 @@ export function Booking() {
     if (err) return toast.error(err);
     setSubmitting(true);
     try {
-      await enroll({
+      const res = await enroll({
         data: {
           ...enForm,
           consent: true as const,
         },
       });
       setSuccess({
-        membershipNumber: "",
+        membershipNumber: res.membershipNumber,
         isNew: true,
         childName: enForm.child_full_name,
       });
@@ -299,12 +299,12 @@ export function Booking() {
           {success ? (
             <div>
               {success.childName ? (
-                <div className="rounded-3xl bg-card p-8 text-center shadow-card">
-                  <div className="text-5xl">🎉</div>
-                  <h3 className="mt-4 font-display text-2xl font-extrabold text-foreground">
-                    Thank you — we&#39;ve received {success.childName}&#39;s registration!
-                  </h3>
-                  <p className="mt-3 font-medium text-muted-foreground">
+                <div>
+                  <MembershipSuccess
+                    membershipNumber={success.membershipNumber}
+                    title={`Thank you — we've received ${success.childName}'s registration!`}
+                  />
+                  <p className="mt-4 text-center font-medium text-muted-foreground">
                     Our team will be in touch shortly to confirm your spot.
                   </p>
                 </div>

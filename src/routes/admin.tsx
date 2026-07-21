@@ -6,7 +6,6 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Table,
   TableBody,
@@ -15,21 +14,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Users, CalendarCheck, ArrowUpDown, Lock, ClipboardList } from "lucide-react";
-import {
-  adminGetOverview,
-  adminListMembers,
-  adminListBookings,
-  adminUpdateBookingStatus,
-} from "@/lib/members.functions";
+import { ArrowUpDown, Lock, ClipboardList } from "lucide-react";
 import { adminListEnrollments, type AdminEnrollment } from "@/lib/enrollments.functions";
 
 export const Route = createFileRoute("/admin")({
@@ -39,9 +24,6 @@ export const Route = createFileRoute("/admin")({
   component: AdminPage,
 });
 
-type Overview = Awaited<ReturnType<typeof adminGetOverview>>;
-type Member = Awaited<ReturnType<typeof adminListMembers>>[number];
-type BookingRow = Awaited<ReturnType<typeof adminListBookings>>[number];
 type EnrollmentRow = AdminEnrollment;
 
 function errMsg(e: unknown): string {
@@ -56,49 +38,24 @@ function errMsg(e: unknown): string {
 }
 
 function AdminPage() {
-  const getOverview = useServerFn(adminGetOverview);
-  const listMembers = useServerFn(adminListMembers);
-  const listBookings = useServerFn(adminListBookings);
   const listEnrollments = useServerFn(adminListEnrollments);
-  const updateStatus = useServerFn(adminUpdateBookingStatus);
 
   const [password, setPassword] = useState("");
   const [authed, setAuthed] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const [overview, setOverview] = useState<Overview | null>(null);
-  const [members, setMembers] = useState<Member[]>([]);
-  const [bookings, setBookings] = useState<BookingRow[]>([]);
   const [enrollments, setEnrollments] = useState<EnrollmentRow[]>([]);
 
   const loadAll = async (pw: string) => {
     setLoading(true);
     try {
-      const [ov, mem, bk, en] = await Promise.all([
-        getOverview({ data: { password: pw } }),
-        listMembers({ data: { password: pw } }),
-        listBookings({ data: { password: pw } }),
-        listEnrollments({ data: { password: pw } }),
-      ]);
-      setOverview(ov);
-      setMembers(mem as Member[]);
-      setBookings(bk as BookingRow[]);
+      const en = await listEnrollments({ data: { password: pw } });
       setEnrollments(en as EnrollmentRow[]);
       setAuthed(true);
     } catch (e: unknown) {
       toast.error(errMsg(e));
     } finally {
       setLoading(false);
-    }
-  };
-
-  const changeStatus = async (id: string, status: "Pending" | "Confirmed" | "Cancelled") => {
-    try {
-      await updateStatus({ data: { password, id, status } });
-      setBookings((rows) => rows.map((r) => (r.id === id ? { ...r, status } : r)));
-      toast.success(`Booking marked ${status}.`);
-    } catch (e: unknown) {
-      toast.error(errMsg(e));
     }
   };
 
@@ -147,102 +104,17 @@ function AdminPage() {
       <div className="mx-auto max-w-6xl px-5 py-10">
         <h1 className="font-display text-3xl font-extrabold text-foreground">Admin Dashboard</h1>
 
-        <div className="mt-6 grid gap-4 sm:grid-cols-3">
-          <StatCard
-            icon={<Users className="h-6 w-6" />}
-            label="Total Members"
-            value={overview?.totalMembers ?? 0}
-          />
-          <StatCard
-            icon={<CalendarCheck className="h-6 w-6" />}
-            label="Total Bookings"
-            value={overview?.totalBookings ?? 0}
-          />
+        <div className="mt-6">
           <StatCard
             icon={<ClipboardList className="h-6 w-6" />}
-            label="Total Enrollments"
+            label="Total Registrations"
             value={enrollments.length}
           />
         </div>
 
-        <Tabs defaultValue="overview" className="mt-8">
-          <TabsList>
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="enrollments">Enrollments</TabsTrigger>
-            <TabsTrigger value="members">Members</TabsTrigger>
-            <TabsTrigger value="bookings">Bookings</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="overview" className="mt-6 grid gap-8">
-            <Panel title="Last 10 Registrations">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Member #</TableHead>
-                    <TableHead>Child</TableHead>
-                    <TableHead>Parent</TableHead>
-                    <TableHead>Phone</TableHead>
-                    <TableHead>Date</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {overview?.recentRegistrations.map((r) => (
-                    <TableRow key={r.id}>
-                      <TableCell className="font-bold text-primary">
-                        {r.membership_number}
-                      </TableCell>
-                      <TableCell>{r.name}</TableCell>
-                      <TableCell>{r.parent}</TableCell>
-                      <TableCell>{r.phone}</TableCell>
-                      <TableCell>{fmt(r.created_at)}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </Panel>
-
-            <Panel title="Last 10 Bookings">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Member #</TableHead>
-                    <TableHead>Service</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Time</TableHead>
-                    <TableHead>Status</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {overview?.recentBookings.map((b) => (
-                    <TableRow key={b.id}>
-                      <TableCell className="font-bold text-primary">
-                        {b.membership_number}
-                      </TableCell>
-                      <TableCell>{b.service}</TableCell>
-                      <TableCell>{b.booking_date || "—"}</TableCell>
-                      <TableCell>{b.booking_time || "—"}</TableCell>
-                      <TableCell>
-                        <StatusBadge status={b.status} />
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </Panel>
-          </TabsContent>
-
-          <TabsContent value="enrollments" className="mt-6">
-            <EnrollmentsTable enrollments={enrollments} />
-          </TabsContent>
-
-          <TabsContent value="members" className="mt-6">
-            <MembersTable members={members} />
-          </TabsContent>
-
-          <TabsContent value="bookings" className="mt-6">
-            <BookingsTable bookings={bookings} onStatus={changeStatus} />
-          </TabsContent>
-        </Tabs>
+        <div className="mt-8">
+          <EnrollmentsTable enrollments={enrollments} />
+        </div>
       </div>
       <Toaster richColors position="top-center" />
     </div>
@@ -255,7 +127,7 @@ function fmt(d: string) {
 
 function StatCard({ icon, label, value }: { icon: React.ReactNode; label: string; value: number }) {
   return (
-    <div className="flex items-center gap-4 rounded-2xl bg-card p-6 shadow-card">
+    <div className="flex max-w-xs items-center gap-4 rounded-2xl bg-card p-6 shadow-card">
       <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
         {icon}
       </span>
@@ -265,21 +137,6 @@ function StatCard({ icon, label, value }: { icon: React.ReactNode; label: string
       </div>
     </div>
   );
-}
-
-function Panel({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <div className="rounded-2xl bg-card p-6 shadow-card">
-      <h2 className="mb-4 font-display text-xl font-extrabold text-foreground">{title}</h2>
-      <div className="overflow-x-auto">{children}</div>
-    </div>
-  );
-}
-
-function StatusBadge({ status }: { status: string }) {
-  const variant =
-    status === "Confirmed" ? "default" : status === "Cancelled" ? "destructive" : "secondary";
-  return <Badge variant={variant}>{status}</Badge>;
 }
 
 type SortDir = "asc" | "desc";
@@ -328,69 +185,6 @@ function SortHead<T>({
   );
 }
 
-function MembersTable({ members }: { members: Member[] }) {
-  const [q, setQ] = useState("");
-  const filtered = members.filter((m) =>
-    [m.membership_number, m.first_name, m.last_name, m.parent_name, m.parent_phone, m.parent_email]
-      .join(" ")
-      .toLowerCase()
-      .includes(q.toLowerCase()),
-  );
-  const { sorted, toggle } = useSort(filtered, "created_at");
-
-  return (
-    <div className="rounded-2xl bg-card p-6 shadow-card">
-      <Input
-        value={q}
-        onChange={(e) => setQ(e.target.value)}
-        placeholder="Search members…"
-        className="mb-4 max-w-sm"
-      />
-      <div className="overflow-x-auto">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <SortHead<Member> label="Member #" field="membership_number" toggle={toggle} />
-              <SortHead<Member> label="First" field="first_name" toggle={toggle} />
-              <SortHead<Member> label="Last" field="last_name" toggle={toggle} />
-              <SortHead<Member> label="DOB" field="dob" toggle={toggle} />
-              <SortHead<Member> label="Sex" field="sex" toggle={toggle} />
-              <TableHead>Allergies</TableHead>
-              <SortHead<Member> label="Parent" field="parent_name" toggle={toggle} />
-              <TableHead>Phone</TableHead>
-              <TableHead>Email</TableHead>
-              <TableHead>Emergency</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {sorted.map((m) => (
-              <TableRow key={m.id}>
-                <TableCell className="font-bold text-primary">{m.membership_number}</TableCell>
-                <TableCell>{m.first_name}</TableCell>
-                <TableCell>{m.last_name}</TableCell>
-                <TableCell>{m.dob || "—"}</TableCell>
-                <TableCell>{m.sex || "—"}</TableCell>
-                <TableCell>{m.allergies || "None"}</TableCell>
-                <TableCell>{m.parent_name}</TableCell>
-                <TableCell>{m.parent_phone}</TableCell>
-                <TableCell>{m.parent_email || "—"}</TableCell>
-                <TableCell>{m.emergency_contact || "—"}</TableCell>
-              </TableRow>
-            ))}
-            {sorted.length === 0 && (
-              <TableRow>
-                <TableCell colSpan={10} className="text-center text-muted-foreground">
-                  No members found.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </div>
-    </div>
-  );
-}
-
 function csvEscape(v: unknown): string {
   const s = v == null ? "" : Array.isArray(v) ? v.join("; ") : String(v);
   return `"${s.replace(/"/g, '""')}"`;
@@ -398,6 +192,7 @@ function csvEscape(v: unknown): string {
 
 function downloadEnrollmentsCsv(rows: EnrollmentRow[]) {
   const headers: (keyof EnrollmentRow)[] = [
+    "membership_number",
     "created_at",
     "child_full_name",
     "child_dob",
@@ -432,7 +227,7 @@ function downloadEnrollmentsCsv(rows: EnrollmentRow[]) {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = `kidsnook-enrollments-${new Date().toISOString().slice(0, 10)}.csv`;
+  a.download = `kidsnook-registrations-${new Date().toISOString().slice(0, 10)}.csv`;
   a.click();
   URL.revokeObjectURL(url);
 }
@@ -441,7 +236,14 @@ function EnrollmentsTable({ enrollments }: { enrollments: EnrollmentRow[] }) {
   const [q, setQ] = useState("");
   const [expanded, setExpanded] = useState<string | null>(null);
   const filtered = enrollments.filter((e) =>
-    [e.child_full_name, e.parent_full_name, e.parent_phone, e.parent_email, ...e.services]
+    [
+      e.membership_number,
+      e.child_full_name,
+      e.parent_full_name,
+      e.parent_phone,
+      e.parent_email,
+      ...e.services,
+    ]
       .join(" ")
       .toLowerCase()
       .includes(q.toLowerCase()),
@@ -454,8 +256,8 @@ function EnrollmentsTable({ enrollments }: { enrollments: EnrollmentRow[] }) {
         <Input
           value={q}
           onChange={(e) => setQ(e.target.value)}
-          placeholder="Search enrollments…"
-          className="max-w-sm"
+          placeholder="Search by membership #, child, parent, phone, email, service…"
+          className="max-w-md"
         />
         <Button
           variant="outline"
@@ -470,6 +272,7 @@ function EnrollmentsTable({ enrollments }: { enrollments: EnrollmentRow[] }) {
         <Table>
           <TableHeader>
             <TableRow>
+              <SortHead<EnrollmentRow> label="Member #" field="membership_number" toggle={toggle} />
               <SortHead<EnrollmentRow> label="Submitted" field="created_at" toggle={toggle} />
               <SortHead<EnrollmentRow> label="Child" field="child_full_name" toggle={toggle} />
               <SortHead<EnrollmentRow> label="Parent" field="parent_full_name" toggle={toggle} />
@@ -487,8 +290,9 @@ function EnrollmentsTable({ enrollments }: { enrollments: EnrollmentRow[] }) {
             {sorted.map((e) => (
               <Fragment key={e.id}>
                 <TableRow>
+                  <TableCell className="font-bold text-primary">{e.membership_number}</TableCell>
                   <TableCell>{fmt(e.created_at)}</TableCell>
-                  <TableCell className="font-bold text-primary">{e.child_full_name}</TableCell>
+                  <TableCell className="font-bold text-foreground">{e.child_full_name}</TableCell>
                   <TableCell>{e.parent_full_name}</TableCell>
                   <TableCell>{e.parent_phone}</TableCell>
                   <TableCell className="max-w-xs">
@@ -507,9 +311,10 @@ function EnrollmentsTable({ enrollments }: { enrollments: EnrollmentRow[] }) {
                 </TableRow>
                 {expanded === e.id && (
                   <TableRow>
-                    <TableCell colSpan={7} className="bg-muted">
+                    <TableCell colSpan={8} className="bg-muted">
                       <div className="grid gap-4 py-2 sm:grid-cols-2 lg:grid-cols-3">
                         <DetailBlock title="Child">
+                          <DetailRow k="Membership #" v={e.membership_number} />
                           <DetailRow k="Full name" v={e.child_full_name} />
                           <DetailRow k="DOB" v={e.child_dob} />
                           <DetailRow k="Gender" v={e.child_gender} />
@@ -555,8 +360,8 @@ function EnrollmentsTable({ enrollments }: { enrollments: EnrollmentRow[] }) {
             ))}
             {sorted.length === 0 && (
               <TableRow>
-                <TableCell colSpan={7} className="text-center text-muted-foreground">
-                  No enrollments found.
+                <TableCell colSpan={8} className="text-center text-muted-foreground">
+                  No registrations found.
                 </TableCell>
               </TableRow>
             )}
@@ -583,89 +388,6 @@ function DetailRow({ k, v }: { k: string; v: string | null | undefined }) {
     <div className="flex justify-between gap-3 text-sm">
       <span className="text-muted-foreground">{k}</span>
       <span className="text-right font-semibold text-foreground">{v || "—"}</span>
-    </div>
-  );
-}
-
-function BookingsTable({
-  bookings,
-  onStatus,
-}: {
-  bookings: BookingRow[];
-  onStatus: (id: string, status: "Pending" | "Confirmed" | "Cancelled") => void;
-}) {
-  const [q, setQ] = useState("");
-  const filtered = bookings.filter((b) =>
-    [b.membership_number, b.child_name, b.parent_name, b.service, b.status]
-      .join(" ")
-      .toLowerCase()
-      .includes(q.toLowerCase()),
-  );
-  const { sorted, toggle } = useSort(filtered, "created_at");
-
-  return (
-    <div className="rounded-2xl bg-card p-6 shadow-card">
-      <Input
-        value={q}
-        onChange={(e) => setQ(e.target.value)}
-        placeholder="Search bookings…"
-        className="mb-4 max-w-sm"
-      />
-      <div className="overflow-x-auto">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <SortHead<BookingRow> label="Member #" field="membership_number" toggle={toggle} />
-              <SortHead<BookingRow> label="Child" field="child_name" toggle={toggle} />
-              <SortHead<BookingRow> label="Parent" field="parent_name" toggle={toggle} />
-              <SortHead<BookingRow> label="Service" field="service" toggle={toggle} />
-              <SortHead<BookingRow> label="Date" field="booking_date" toggle={toggle} />
-              <TableHead>Time</TableHead>
-              <SortHead<BookingRow> label="Status" field="status" toggle={toggle} />
-              <TableHead>Set Status</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {sorted.map((b) => (
-              <TableRow key={b.id}>
-                <TableCell className="font-bold text-primary">{b.membership_number}</TableCell>
-                <TableCell>{b.child_name || "—"}</TableCell>
-                <TableCell>{b.parent_name || "—"}</TableCell>
-                <TableCell>{b.service}</TableCell>
-                <TableCell>{b.booking_date || "—"}</TableCell>
-                <TableCell>{b.booking_time || "—"}</TableCell>
-                <TableCell>
-                  <StatusBadge status={b.status} />
-                </TableCell>
-                <TableCell>
-                  <Select
-                    value={b.status}
-                    onValueChange={(v) =>
-                      onStatus(b.id, v as "Pending" | "Confirmed" | "Cancelled")
-                    }
-                  >
-                    <SelectTrigger className="h-8 w-36">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Pending">Pending</SelectItem>
-                      <SelectItem value="Confirmed">Confirmed</SelectItem>
-                      <SelectItem value="Cancelled">Cancelled</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </TableCell>
-              </TableRow>
-            ))}
-            {sorted.length === 0 && (
-              <TableRow>
-                <TableCell colSpan={8} className="text-center text-muted-foreground">
-                  No bookings found.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </div>
     </div>
   );
 }
