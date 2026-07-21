@@ -120,7 +120,11 @@ export function Booking() {
   const book = useServerFn(createBooking);
   const enroll = useServerFn(createEnrollment);
   const fetchServices = useServerFn(listServices);
-  const { data: SERVICES = [], isLoading: servicesLoading } = useQuery({
+  const {
+    data: SERVICES = [],
+    isLoading: servicesLoading,
+    isError: servicesError,
+  } = useQuery({
     queryKey: ["services"],
     queryFn: () => fetchServices(),
     staleTime: 5 * 60 * 1000,
@@ -659,7 +663,13 @@ export function Booking() {
                       {servicesLoading && (
                         <p className="text-sm text-muted-foreground">Loading services…</p>
                       )}
-                      {!servicesLoading && SERVICES.length === 0 && (
+                      {servicesError && (
+                        <p className="text-sm text-destructive">
+                          Couldn&#39;t load services right now. Please refresh the page or try again
+                          shortly.
+                        </p>
+                      )}
+                      {!servicesLoading && !servicesError && SERVICES.length === 0 && (
                         <p className="text-sm text-muted-foreground">
                           No services available right now.
                         </p>
