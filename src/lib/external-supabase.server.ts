@@ -28,7 +28,7 @@ export function externalSupabase(): SupabaseClient<Database> {
       ...(!anonKey ? ["EXTERNAL_SUPABASE_ANON_KEY"] : []),
     ];
     throw new Error(
-      `Missing external Supabase secret(s): ${missing.join(", ")}. Add them via Lovable secrets.`,
+      `Missing external Supabase secret(s): ${missing.join(", ")}. Add them in your hosting platform's environment variables (Vercel/Cloudflare/Lovable).`,
     );
   }
 
@@ -58,7 +58,7 @@ export function externalSupabaseAdmin(): SupabaseClient<Database> {
       ...(!serviceKey ? ["EXTERNAL_SUPABASE_SERVICE_ROLE_KEY"] : []),
     ];
     throw new Error(
-      `Missing external Supabase secret(s): ${missing.join(", ")}. Add them via Lovable secrets.`,
+      `Missing external Supabase secret(s): ${missing.join(", ")}. Add them in your hosting platform's environment variables (Vercel/Cloudflare/Lovable).`,
     );
   }
 

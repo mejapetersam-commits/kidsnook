@@ -12,22 +12,12 @@ export type Service = { id: string; name: string; description: string | null };
 
 // ---------- Services (read from the external `services` table) ----------
 export const listServices = createServerFn({ method: "GET" }).handler(async () => {
-  console.log("[listServices] handler invoked");
-  try {
-    const { data, error } = await externalSupabase()
-      .from("services")
-      .select("id, name, description")
-      .order("sort_order", { ascending: true });
-    if (error) {
-      console.error("[listServices] supabase error:", error.message);
-      throw new Error(error.message);
-    }
-    console.log("[listServices] returning", (data ?? []).length, "rows");
-    return (data ?? []) as Service[];
-  } catch (e) {
-    console.error("[listServices] threw:", e instanceof Error ? e.message : String(e));
-    throw e;
-  }
+  const { data, error } = await externalSupabase()
+    .from("services")
+    .select("id, name, description")
+    .order("sort_order", { ascending: true });
+  if (error) throw new Error(error.message);
+  return (data ?? []) as Service[];
 });
 
 // ---------- Enrollment submission ----------
