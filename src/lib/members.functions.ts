@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { assertAdmin } from "@/lib/admin-auth.server";
+import { externalSupabaseAdmin } from "@/lib/external-supabase.server";
 
 // All member/parent/booking data now lives in the EXTERNAL Supabase project
 // (source of truth). These tables are RLS-locked (no anon policies) exactly as
@@ -78,7 +79,6 @@ async function nextMembershipNumber(
 
 // Creates the child + linked parent rows and returns the membership number.
 async function createMemberRecords(parent: ParentInput, child: ChildInput): Promise<string> {
-  const { externalSupabaseAdmin } = await import("@/lib/external-supabase.server");
   const admin = externalSupabaseAdmin();
 
   const membership_number = await nextMembershipNumber(admin);
@@ -131,7 +131,6 @@ export const lookupMember = createServerFn({ method: "POST" })
     z.object({ membership_number: z.string().trim().min(1).max(20) }).parse(data),
   )
   .handler(async ({ data }): Promise<LookupResult> => {
-    const { externalSupabaseAdmin } = await import("@/lib/external-supabase.server");
     const admin = externalSupabaseAdmin();
 
     const { data: child, error } = await admin
@@ -168,7 +167,6 @@ export const createBooking = createServerFn({ method: "POST" })
       .parse(data),
   )
   .handler(async ({ data }) => {
-    const { externalSupabaseAdmin } = await import("@/lib/external-supabase.server");
     const admin = externalSupabaseAdmin();
 
     const { data: child, error: lookupErr } = await admin
@@ -208,8 +206,6 @@ export const registerAndBook = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }) => {
     const membershipNumber = await createMemberRecords(data.parent, data.child);
-
-    const { externalSupabaseAdmin } = await import("@/lib/external-supabase.server");
     const admin = externalSupabaseAdmin();
     const { error } = await admin.from("bookings").insert({
       id: crypto.randomUUID(),
@@ -309,7 +305,6 @@ export const adminGetOverview = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => z.object({ password: z.string() }).parse(data))
   .handler(async ({ data }): Promise<AdminOverview> => {
     assertAdmin(data.password);
-    const { externalSupabaseAdmin } = await import("@/lib/external-supabase.server");
     const admin = externalSupabaseAdmin();
 
     const [membersCount, bookingsCount] = await Promise.all([
@@ -366,7 +361,6 @@ export const adminListMembers = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => z.object({ password: z.string() }).parse(data))
   .handler(async ({ data }): Promise<AdminMember[]> => {
     assertAdmin(data.password);
-    const { externalSupabaseAdmin } = await import("@/lib/external-supabase.server");
     const admin = externalSupabaseAdmin();
 
     const { data: children, error } = await admin
@@ -403,7 +397,6 @@ export const adminListBookings = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => z.object({ password: z.string() }).parse(data))
   .handler(async ({ data }): Promise<AdminBooking[]> => {
     assertAdmin(data.password);
-    const { externalSupabaseAdmin } = await import("@/lib/external-supabase.server");
     const admin = externalSupabaseAdmin();
 
     const { data: bookings, error } = await admin
@@ -441,7 +434,6 @@ export const adminUpdateBookingStatus = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }) => {
     assertAdmin(data.password);
-    const { externalSupabaseAdmin } = await import("@/lib/external-supabase.server");
     const { error } = await externalSupabaseAdmin()
       .from("bookings")
       .update({ status: data.status })

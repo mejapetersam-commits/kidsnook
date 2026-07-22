@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { assertAdmin } from "@/lib/admin-auth.server";
+import { externalSupabase, externalSupabaseAdmin } from "@/lib/external-supabase.server";
 
 // All application data now lives in the EXTERNAL Supabase project (source of
 // truth). Public reads (services) go through the anon client; writes to the
@@ -11,7 +12,6 @@ export type Service = { id: string; name: string; description: string | null };
 
 // ---------- Services (read from the external `services` table) ----------
 export const listServices = createServerFn({ method: "GET" }).handler(async () => {
-  const { externalSupabase } = await import("@/lib/external-supabase.server");
   const { data, error } = await externalSupabase()
     .from("services")
     .select("id, name, description")
@@ -87,7 +87,6 @@ export const adminListEnrollments = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => z.object({ password: z.string() }).parse(data))
   .handler(async ({ data }): Promise<AdminEnrollment[]> => {
     assertAdmin(data.password);
-    const { externalSupabaseAdmin } = await import("@/lib/external-supabase.server");
     const { data: rows, error } = await externalSupabaseAdmin()
       .from("enrollments")
       .select(
@@ -101,7 +100,6 @@ export const adminListEnrollments = createServerFn({ method: "POST" })
 export const createEnrollment = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => enrollmentSchema.parse(data))
   .handler(async ({ data }) => {
-    const { externalSupabaseAdmin } = await import("@/lib/external-supabase.server");
     const { data: row, error } = await externalSupabaseAdmin()
       .from("enrollments")
       .insert({
