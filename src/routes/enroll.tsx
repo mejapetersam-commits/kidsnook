@@ -21,6 +21,12 @@ import { Navbar } from "@/components/site/Navbar";
 import { Footer } from "@/components/site/Footer";
 import { Stepper } from "@/components/site/Stepper";
 import { MembershipSuccess } from "@/components/site/MembershipSuccess";
+import {
+  ConsentCheckboxes,
+  emptyConsent,
+  validateConsent,
+  type Consent,
+} from "@/components/site/ConsentCheckboxes";
 import { listServices, createEnrollment, type Service } from "@/lib/enrollments.functions";
 import { cn } from "@/lib/utils";
 
@@ -114,7 +120,7 @@ function EnrollPage() {
   const [step, setStep] = useState(0);
   const [f, setF] = useState<Form>(emptyForm);
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
-  const [consent, setConsent] = useState(false);
+  const [consent, setConsent] = useState<Consent>(emptyConsent);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
@@ -159,7 +165,8 @@ function EnrollPage() {
     } else if (s === 4) {
       if (selectedServices.length === 0) e.services = "Please select at least one service.";
       if (!f.preferred_start_date) e.preferred_start_date = "Preferred start date is required.";
-      if (!consent) e.consent = "Please provide your consent to continue.";
+      const consentErr = validateConsent(consent);
+      if (consentErr) e.consent = consentErr;
     }
     setErrors(e);
     return Object.keys(e).length === 0;
@@ -592,8 +599,8 @@ function StepServices({
   services: Service[];
   selected: string[];
   toggle: (name: string, on: boolean) => void;
-  consent: boolean;
-  setConsent: (v: boolean) => void;
+  consent: Consent;
+  setConsent: (v: Consent) => void;
 }) {
   return (
     <StepShell
@@ -665,17 +672,7 @@ function StepServices({
         </Field>
       </div>
 
-      <label className="flex items-start gap-3 rounded-2xl bg-muted p-5">
-        <Checkbox
-          checked={consent}
-          onCheckedChange={(v) => setConsent(v === true)}
-          className="mt-1"
-        />
-        <span className="text-sm font-semibold text-foreground">
-          I consent to KidsNook collecting and storing the above information for the purpose of
-          enrolling my child in care. <span className="text-destructive">*</span>
-        </span>
-      </label>
+      <ConsentCheckboxes value={consent} onChange={setConsent} />
       {errors.consent && (
         <p className="-mt-2 text-sm font-semibold text-destructive">{errors.consent}</p>
       )}

@@ -199,7 +199,8 @@ export function Booking() {
     if (s === 4) {
       if (f.services.length === 0) return "Please select at least one service.";
       if (!f.preferred_start_date.trim()) return "Preferred start date is required.";
-      if (!f.consent) return "You must accept the consent declaration to proceed.";
+      const consentErr = validateConsent(consent);
+      if (consentErr) return consentErr;
     }
     return null;
   };
@@ -712,23 +713,7 @@ export function Booking() {
                         />
                       </Field>
                     </div>
-                    <div className="rounded-2xl border border-border p-5">
-                      <p className="text-sm font-bold text-foreground">Consent Declaration</p>
-                      <p className="mt-2 text-sm text-muted-foreground">
-                        I confirm that the information provided is accurate. I consent to my child
-                        participating in Kids&#39; Nook activities and authorize staff to administer
-                        first aid if required. I understand the terms and conditions of enrollment.
-                      </p>
-                      <label className="mt-4 flex cursor-pointer items-center gap-3">
-                        <Checkbox
-                          checked={enForm.consent}
-                          onCheckedChange={(v) => set("consent", Boolean(v))}
-                        />
-                        <span className="text-sm font-semibold text-foreground">
-                          I agree to the above declaration
-                        </span>
-                      </label>
-                    </div>
+                    <ConsentCheckboxes value={consent} onChange={setConsent} />
                   </div>
                 )}
 
