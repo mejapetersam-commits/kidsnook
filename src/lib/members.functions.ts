@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { assertAdmin } from "@/lib/admin-auth.server";
 import { externalSupabaseAdmin } from "@/lib/external-supabase.server";
+import { sendMembershipNumberEmail } from "@/lib/email.server";
 
 // All member/parent/booking data now lives in the EXTERNAL Supabase project
 // (source of truth). These tables are RLS-locked (no anon policies) exactly as
@@ -253,7 +254,12 @@ export const registerAndBook = createServerFn({ method: "POST" })
       status: "Pending",
     });
     if (error) throw new Error(error.message);
-    // 📱 TODO: Integrate SMS/email delivery of the Membership Number + booking here.
+    await sendMembershipNumberEmail({
+      to: data.parent.email,
+      childName: `${data.child.first_name} ${data.child.last_name}`.trim(),
+      membershipNumber,
+    });
+    // 📱 TODO: Integrate WhatsApp delivery of the Membership Number + booking here too.
     return { membershipNumber };
   });
 

@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { assertAdmin } from "@/lib/admin-auth.server";
 import { externalSupabase, externalSupabaseAdmin } from "@/lib/external-supabase.server";
+import { sendMembershipNumberEmail } from "@/lib/email.server";
 
 // All application data now lives in the EXTERNAL Supabase project (source of
 // truth). Public reads (services) go through the anon client; writes to the
@@ -132,6 +133,11 @@ export const createEnrollment = createServerFn({ method: "POST" })
       .select("membership_number")
       .single();
     if (error) throw new Error(error.message);
-    // 📱 TODO: Integrate SMS/email confirmation of the enrollment here.
+    await sendMembershipNumberEmail({
+      to: data.parent_email,
+      childName: data.child_full_name,
+      membershipNumber: row.membership_number as string,
+    });
+    // 📱 TODO: Integrate WhatsApp confirmation of the enrollment here too.
     return { ok: true as const, membershipNumber: row.membership_number as string };
   });
