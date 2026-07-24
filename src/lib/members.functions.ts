@@ -126,36 +126,81 @@ type LookupResult =
       parent: { name: string } | null;
     };
 
+// Membership numbers are now issued from two places: the legacy "children"
+// table (older member/booking flow) and the newer "enrollments" table (the
+// richer registration flow, which auto-generates its own membership_number
+// via a DB trigger — see the 20260721232604 migration). This checks both so
+// a membership number from either flow is traceable from the "Existing
+// Member" lookup, instead of only ever finding pre-enrollments-era members.
+async function findMemberByNumber(
+  admin: ReturnType<typeof externalSupabaseAdmin>,
+  membershipNumber: string,
+): Promise<{
+  id: string;
+  first_name: string;
+  last_name: string;
+  membership_number: string;
+  parent_name: string | null;
+} | null> {
+  const { data: child, error: childErr } = await admin
+    .from("children")
+    .select("id, first_name, last_name, membership_number")
+    .eq("membership_number", membershipNumber)
+    .maybeSingle();
+  if (childErr) throw new Error(childErr.message);
+  if (child) {
+    const { data: parent } = await admin
+      .from("parents")
+      .select("name")
+      .eq("child_id", child.id)
+      .maybeSingle();
+    return {
+      id: child.id,
+      first_name: child.first_name,
+      last_name: child.last_name,
+      membership_number: child.membership_number,
+      parent_name: parent?.name ?? null,
+    };
+  }
+
+  const { data: enrollment, error: enrollErr } = await admin
+    .from("enrollments")
+    .select("id, child_full_name, membership_number, parent_full_name")
+    .eq("membership_number", membershipNumber)
+    .maybeSingle();
+  if (enrollErr) throw new Error(enrollErr.message);
+  if (enrollment) {
+    const [first_name, ...rest] = enrollment.child_full_name.trim().split(/\s+/);
+    return {
+      id: enrollment.id,
+      first_name: first_name ?? enrollment.child_full_name,
+      last_name: rest.join(" "),
+      membership_number: enrollment.membership_number,
+      parent_name: enrollment.parent_full_name ?? null,
+    };
+  }
+
+  return null;
+}
+
 export const lookupMember = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) =>
     z.object({ membership_number: z.string().trim().min(1).max(20) }).parse(data),
   )
   .handler(async ({ data }): Promise<LookupResult> => {
     const admin = externalSupabaseAdmin();
-
-    const { data: child, error } = await admin
-      .from("children")
-      .select("id, first_name, last_name, membership_number")
-      .eq("membership_number", data.membership_number)
-      .maybeSingle();
-    if (error) throw new Error(error.message);
-    if (!child) return { found: false };
-
-    const { data: parent } = await admin
-      .from("parents")
-      .select("name")
-      .eq("child_id", child.id)
-      .maybeSingle();
+    const member = await findMemberByNumber(admin, data.membership_number);
+    if (!member) return { found: false };
 
     return {
       found: true,
       child: {
-        id: child.id,
-        first_name: child.first_name,
-        last_name: child.last_name,
-        membership_number: child.membership_number,
+        id: member.id,
+        first_name: member.first_name,
+        last_name: member.last_name,
+        membership_number: member.membership_number,
       },
-      parent: parent ? { name: parent.name } : null,
+      parent: member.parent_name ? { name: member.parent_name } : null,
     };
   });
 
@@ -169,25 +214,14 @@ export const createBooking = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const admin = externalSupabaseAdmin();
 
-    const { data: child, error: lookupErr } = await admin
-      .from("children")
-      .select("id, first_name, last_name, membership_number")
-      .eq("membership_number", data.membership_number)
-      .maybeSingle();
-    if (lookupErr) throw new Error(lookupErr.message);
-    if (!child) throw new Error("Membership Number not found.");
-
-    const { data: parent } = await admin
-      .from("parents")
-      .select("name")
-      .eq("child_id", child.id)
-      .maybeSingle();
+    const member = await findMemberByNumber(admin, data.membership_number);
+    if (!member) throw new Error("Membership Number not found.");
 
     const { error } = await admin.from("bookings").insert({
       id: crypto.randomUUID(),
-      membership_number: child.membership_number,
-      child_name: `${child.first_name} ${child.last_name}`.trim(),
-      parent_name: parent?.name ?? null,
+      membership_number: member.membership_number,
+      child_name: `${member.first_name} ${member.last_name}`.trim(),
+      parent_name: member.parent_name,
       service: data.service,
       booking_date: nn(data.booking_date),
       booking_time: nn(data.booking_time),
@@ -196,7 +230,7 @@ export const createBooking = createServerFn({ method: "POST" })
     });
     if (error) throw new Error(error.message);
     // 📱 TODO: Integrate SMS/email confirmation of the booking here.
-    return { ok: true as const, membershipNumber: child.membership_number };
+    return { ok: true as const, membershipNumber: member.membership_number };
   });
 
 // ---------- New client: register + book ----------
